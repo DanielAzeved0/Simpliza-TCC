@@ -1,21 +1,22 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { AntDesign, Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, Feather, FontAwesome5, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
+      
+      {/* Botão de Configurações no canto superior direito */}
+      <TouchableOpacity
+        style={styles.settingsButton}
+        onPress={() => navigation.navigate('Configuracoes')}
+      >
+        <Ionicons name="settings-outline" size={28} color="#065f46" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>SIMPLIZA</Text>
 
       <View style={styles.grid}>
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('NovoRegistro')}
-        >
-          <AntDesign name="pluscircleo" size={32} color="#065f46" />
-          <Text style={styles.cardText}>Novo Registro</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.card}
           onPress={() => navigation.navigate('Historico')}
@@ -37,17 +38,27 @@ export default function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate('Inteligencia')}
         >
           <MaterialCommunityIcons name="robot" size={32} color="#065f46" />
-          <Text style={styles.cardText}>Inteligencia Artificial</Text>
+          <Text style={styles.cardText}>Inteligência Artificial</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.cardFull}
+          style={styles.card}
           onPress={() => navigation.navigate('DAS')}
         >
           <MaterialCommunityIcons name="calculator-variant" size={32} color="#065f46" />
           <Text style={styles.cardText}>Cálculo do DAS</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Novo Registro como botão grande */}
+      <TouchableOpacity
+        style={styles.cardFull}
+        onPress={() => navigation.navigate('NovoRegistro')}
+      >
+        <AntDesign name="pluscircleo" size={32} color="#065f46" />
+        <Text style={styles.cardText}>Novo Registro</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
@@ -56,17 +67,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#e6f4ea',
-    alignItems: 'center',
-    paddingTop: 80,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+  },
+  settingsButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 1,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#065f46',
+    textAlign: 'center',
     marginBottom: 40,
   },
   grid: {
     width: '90%',
+    alignSelf: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
@@ -85,13 +104,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
   },
   cardFull: {
-    width: '100%',
+    width: '90%',
+    alignSelf: 'center',
     backgroundColor: '#ecfdf5',
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: 20,
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.1,

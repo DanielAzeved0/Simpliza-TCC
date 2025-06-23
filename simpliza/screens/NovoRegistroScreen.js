@@ -68,4 +68,3 @@ const styles = StyleSheet.create({
     color: '#065f46',
   },
 });
-

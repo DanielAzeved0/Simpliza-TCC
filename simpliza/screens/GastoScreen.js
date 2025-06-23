@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { inserirTransacao } from '../database/DatabaseService';
+
+const handleSalvar = () => {
+  inserirTransacao('gasto', titulo, parseFloat(valor), categoria);
+  setTitulo('');
+  setValor('');
+  setCategoria('');
+  alert('Gasto registrado!');
+};
 
 export default function GastoScreen() {
   const [titulo, setTitulo] = useState('');

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createTables } from './database/DatabaseSetup';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -15,6 +16,9 @@ import  ConfiguracoesScreen  from './screens/ConfiguracoesScreen.js';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  useEffect(() => {
+  createTables();
+}, []);
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
