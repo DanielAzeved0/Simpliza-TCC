@@ -1,23 +1,26 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 
-function NovoRegistroScreen({ navigation }) {
+export default function NovoRegistroScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Novo Registro</Text>
 
       <TouchableOpacity
-        style={styles.ganhoBtn}
+        style={[styles.option, styles.ganho]}
         onPress={() => navigation.navigate('Ganho')}
       >
-        <Text style={styles.ganhoText}>+ Registrar Ganho</Text>
+        <AntDesign name="arrowup" size={24} color="#065f46" />
+        <Text style={styles.optionText}>Ganho</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.gastoBtn}
+        style={[styles.option, styles.gasto]}
         onPress={() => navigation.navigate('Gasto')}
       >
-        <Text style={styles.gastoText}>- Registrar Gasto</Text>
+        <AntDesign name="arrowdown" size={24} color="#ffffff" />
+        <Text style={[styles.optionText, { color: '#ffffff' }]}>Gasto</Text>
       </TouchableOpacity>
     </View>
   );
@@ -26,45 +29,43 @@ function NovoRegistroScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#e6f4ea',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
     marginBottom: 40,
   },
-  ganhoBtn: {
-    backgroundColor: '#d1fae5',
-    borderColor: '#10b981',
-    borderWidth: 2,
-    padding: 16,
+  option: {
     width: '90%',
     borderRadius: 12,
+    padding: 20,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 1 },
   },
-  gastoBtn: {
-    backgroundColor: '#fee2e2',
-    borderColor: '#ef4444',
+  ganho: {
+    backgroundColor: '#ecfdf5',
     borderWidth: 2,
-    padding: 16,
-    width: '90%',
-    borderRadius: 12,
-    alignItems: 'center',
+    borderColor: '#065f46',
   },
-  ganhoText: {
+  gasto: {
+    backgroundColor: '#065f46',
+  },
+  optionText: {
+    marginLeft: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#065f46',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  gastoText: {
-    color: '#991b1b',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
-export default NovoRegistroScreen; 
+

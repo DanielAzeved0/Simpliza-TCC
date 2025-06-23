@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-function ConfiguracoesScreen() {
+export default function ConfiguracoesScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Configurações</Text>
@@ -27,11 +27,11 @@ function ConfiguracoesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#e6f4ea',
     padding: 20,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
     marginBottom: 30,
@@ -52,4 +52,3 @@ const styles = StyleSheet.create({
     color: '#065f46',
   },
 });
-export default ConfiguracoesScreen;

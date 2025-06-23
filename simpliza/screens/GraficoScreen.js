@@ -15,7 +15,7 @@ export default function GraficoScreen() {
       },
       {
         data: [1200, 1700, 1600, 1800, 1500],
-        color: () => '#ef4444',
+        color: () => '#dc2626',
         strokeWidth: 2,
       },
     ],
@@ -53,12 +53,12 @@ export default function GraficoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#e6f4ea',
     padding: 16,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,

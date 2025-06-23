@@ -7,12 +7,7 @@ export default function GastoScreen() {
   const [categoria, setCategoria] = useState('');
 
   const handleSalvar = () => {
-    console.log({
-      tipo: 'gasto',
-      titulo,
-      valor,
-      categoria
-    });
+    console.log({ tipo: 'gasto', titulo, valor, categoria });
     setTitulo('');
     setValor('');
     setCategoria('');
@@ -54,31 +49,31 @@ export default function GastoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fef2f2',
+    backgroundColor: '#e6f4ea',
     padding: 20,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#991b1b',
-    marginBottom: 30,
     textAlign: 'center',
+    marginBottom: 30,
   },
   input: {
     height: 50,
     backgroundColor: '#ffffff',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 15,
-    borderColor: '#f87171',
+    borderColor: '#dc2626',
     borderWidth: 1,
   },
   botao: {
     height: 50,
     backgroundColor: '#dc2626',
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,

@@ -7,12 +7,7 @@ export default function GanhoScreen() {
   const [categoria, setCategoria] = useState('');
 
   const handleSalvar = () => {
-    console.log({
-      tipo: 'ganho',
-      titulo,
-      valor,
-      categoria
-    });
+    console.log({ tipo: 'ganho', titulo, valor, categoria });
     setTitulo('');
     setValor('');
     setCategoria('');
@@ -54,21 +49,21 @@ export default function GanhoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#e6f4ea',
     padding: 20,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
-    marginBottom: 30,
     textAlign: 'center',
+    marginBottom: 30,
   },
   input: {
     height: 50,
     backgroundColor: '#ffffff',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 15,
@@ -78,7 +73,7 @@ const styles = StyleSheet.create({
   botao: {
     height: 50,
     backgroundColor: '#10b981',
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,

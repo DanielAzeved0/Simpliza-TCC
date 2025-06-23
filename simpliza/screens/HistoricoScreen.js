@@ -19,7 +19,7 @@ export default function HistoricoScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Histórico de Transações</Text>
+      <Text style={styles.title}>Histórico</Text>
       <FlatList
         data={mockTransacoes}
         keyExtractor={(item) => item.id}
@@ -33,19 +33,19 @@ export default function HistoricoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#e6f4ea',
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
-    marginBottom: 20,
     textAlign: 'center',
+    marginBottom: 20,
   },
   item: {
     padding: 16,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 12,
   },
   ganho: {
@@ -68,3 +68,4 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
+

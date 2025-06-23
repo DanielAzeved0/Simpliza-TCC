@@ -46,12 +46,12 @@ export default function DASScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#e6f4ea',
     padding: 20,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
     textAlign: 'center',
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     backgroundColor: '#ffffff',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 15,
     borderColor: '#10b981',
     borderWidth: 1,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   botao: {
     backgroundColor: '#10b981',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 15,
     alignItems: 'center',
   },

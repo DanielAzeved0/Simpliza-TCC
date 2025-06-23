@@ -1,52 +1,53 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { AntDesign, Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>SIMPLIZA</Text>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('NovoRegistro')}
-      >
-        <Text style={styles.buttonText}>Novo Registro</Text>
-      </TouchableOpacity>
+      <View style={styles.grid}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigation.navigate('NovoRegistro')}
+        >
+          <AntDesign name="pluscircleo" size={32} color="#065f46" />
+          <Text style={styles.cardText}>Novo Registro</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Historico')}
-      >
-        <Text style={styles.buttonText}>Histórico</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigation.navigate('Historico')}
+        >
+          <Feather name="clock" size={32} color="#065f46" />
+          <Text style={styles.cardText}>Histórico</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Grafico')}
-      >
-        <Text style={styles.buttonText}>Gráficos</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigation.navigate('Grafico')}
+        >
+          <FontAwesome5 name="chart-bar" size={32} color="#065f46" />
+          <Text style={styles.cardText}>Gráficos</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Inteligencia')}
-      >
-        <Text style={styles.buttonText}>IA Financeira</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigation.navigate('Inteligencia')}
+        >
+          <MaterialCommunityIcons name="robot" size={32} color="#065f46" />
+          <Text style={styles.cardText}>Inteligencia Artificial</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('DAS')}
-      >
-        <Text style={styles.buttonText}>Cálculo do DAS</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Configuracoes')}
-      >
-        <Text style={styles.buttonText}>Configurações</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cardFull}
+          onPress={() => navigation.navigate('DAS')}
+        >
+          <MaterialCommunityIcons name="calculator-variant" size={32} color="#065f46" />
+          <Text style={styles.cardText}>Cálculo do DAS</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -54,28 +55,53 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ecfdf5',
-    justifyContent: 'center',
+    backgroundColor: '#e6f4ea',
     alignItems: 'center',
-    padding: 20,
+    paddingTop: 80,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#065f46',
     marginBottom: 40,
   },
-  button: {
+  grid: {
     width: '90%',
-    backgroundColor: '#10b981',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 12,
-    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 16,
   },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
+  card: {
+    width: '47%',
+    backgroundColor: '#ecfdf5',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  cardFull: {
+    width: '100%',
+    backgroundColor: '#ecfdf5',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  cardText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#065f46',
     fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
-function InteligenciaScreen() {
+export default function InteligenciaScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>IA Financeira</Text>
@@ -17,9 +17,7 @@ function InteligenciaScreen() {
       <View style={styles.box}>
         <Text style={styles.label}>💡 Dica da IA:</Text>
         <Text style={styles.text}>
-          Considere diminuir seus gastos fixos com transporte e renegociar
-          valores com fornecedores. Isso pode aumentar sua margem de lucro em
-          até 8%!
+          Considere diminuir seus gastos fixos com transporte e renegociar valores com fornecedores.
         </Text>
       </View>
     </ScrollView>
@@ -28,12 +26,12 @@ function InteligenciaScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#e6f4ea',
     padding: 20,
     flexGrow: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
     marginBottom: 20,
@@ -42,7 +40,7 @@ const styles = StyleSheet.create({
   box: {
     backgroundColor: '#ecfdf5',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 16,
     borderLeftColor: '#10b981',
     borderLeftWidth: 5,
@@ -57,4 +55,3 @@ const styles = StyleSheet.create({
     color: '#064e3b',
   },
 });
-export default InteligenciaScreen;
