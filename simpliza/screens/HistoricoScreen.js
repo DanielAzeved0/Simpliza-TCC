@@ -1,35 +1,61 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-
-const mockTransacoes = [
-  { id: '1', tipo: 'ganho', descricao: 'Venda de produto', valor: 250 },
-  { id: '2', tipo: 'gasto', descricao: 'Compra de materiais', valor: 90 },
-  { id: '3', tipo: 'gasto', descricao: 'Transporte', valor: 35 },
-];
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { listarTransacoes } from '../firebase/firebaseService.js';
 
 export default function HistoricoScreen() {
+  const [transacoes, setTransacoes] = useState([]);
+  const [filtro, setFiltro] = useState('todos');
+
+  const carregarTransacoes = async () => {
+    const resultado = await listarTransacoes();
+    setTransacoes(resultado);
+  };
+
+  useEffect(() => {
+    carregarTransacoes();
+  }, []);
+
+  const filtrarTransacoes = () => {
+    if (filtro === 'todos') return transacoes;
+    return transacoes.filter(item => item.tipo === filtro);
+  };
+
   const renderItem = ({ item }) => (
     <View style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}>
-      <Text style={styles.descricao}>{item.descricao}</Text>
+      <Text style={styles.descricao}>{item.titulo}</Text>
       <Text style={styles.valor}>
         {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
       </Text>
+      <Text style={styles.categoria}>Categoria: {item.categoria}</Text>
+      <Text style={styles.data}>{item.data}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
+
+      <View style={styles.filtros}>
+        <TouchableOpacity style={styles.botaoFiltro} onPress={() => setFiltro('todos')}>
+          <Text style={styles.textoFiltro}>Todos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.botaoFiltro} onPress={() => setFiltro('ganho')}>
+          <Text style={styles.textoFiltro}>Ganhos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.botaoFiltro} onPress={() => setFiltro('gasto')}>
+          <Text style={styles.textoFiltro}>Gastos</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
-        data={mockTransacoes}
-        keyExtractor={(item) => item.id}
+        data={filtrarTransacoes()}
+        keyExtractor={item => item.id}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -68,4 +94,3 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
-

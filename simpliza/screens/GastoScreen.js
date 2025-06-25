@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { inserirTransacao } from '../database/DatabaseService';
+import { adicionarTransacao } from '../firebase/firebaseService.js';
 
 const handleSalvar = () => {
-  inserirTransacao('gasto', titulo, parseFloat(valor), categoria);
+  adicionarTransacao('gasto', titulo, valor, categoria);
   setTitulo('');
   setValor('');
   setCategoria('');
-  alert('Gasto registrado!');
+  alert('Gasto registrado');
 };
+
 
 export default function GastoScreen() {
   const [titulo, setTitulo] = useState('');
