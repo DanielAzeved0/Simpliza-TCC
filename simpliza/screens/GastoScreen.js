@@ -1,96 +1,46 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { adicionarTransacao } from '../firebase/firebaseService.js';
-
-const handleSalvar = () => {
-  adicionarTransacao('gasto', titulo, valor, categoria);
-  setTitulo('');
-  setValor('');
-  setCategoria('');
-  alert('Gasto registrado');
-};
-
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import AnimatedInput from '../components/AnimatedInputGasto';
+import { adicionarTransacao } from '../firebase/firebaseService';
 
 export default function GastoScreen() {
   const [titulo, setTitulo] = useState('');
   const [valor, setValor] = useState('');
-  const [categoria, setCategoria] = useState('');
 
   const handleSalvar = () => {
-    console.log({ tipo: 'gasto', titulo, valor, categoria });
-    setTitulo('');
-    setValor('');
-    setCategoria('');
+    if (titulo && valor) {
+      adicionarTransacao('gasto', titulo, valor, 'gasto');
+      setTitulo('');
+      setValor('');
+      alert('Gasto registrado!');
+    } else {
+      alert('Preencha todos os campos!');
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Registrar Gasto</Text>
+      <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
+      <AnimatedInput
+  label="Valor"
+  value={valor}
+  onChangeText={(text) => {
+    const numericValue = text.replace(/[^0-9.]/g, '');
+    setValor(numericValue);
+  }}
+  keyboardType="numeric" 
+/>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Descrição"
-        value={titulo}
-        onChangeText={setTitulo}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Valor"
-        keyboardType="numeric"
-        value={valor}
-        onChangeText={setValor}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Categoria"
-        value={categoria}
-        onChangeText={setCategoria}
-      />
 
       <TouchableOpacity style={styles.botao} onPress={handleSalvar}>
-        <Text style={styles.textoBotao}>Salvar Gasto</Text>
+        <Text style={styles.botaoTexto}>Salvar Ganho</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#e6f4ea',
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#991b1b',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  input: {
-    height: 50,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    marginBottom: 15,
-    borderColor: '#dc2626',
-    borderWidth: 1,
-  },
-  botao: {
-    height: 50,
-    backgroundColor: '#dc2626',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
-  textoBotao: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  container: { flex: 1, backgroundColor: '#fef2f2', alignItems: 'center', paddingTop: 50 },
+  botao: { backgroundColor: '#ef4444', padding: 15, borderRadius: 10, marginTop: 20 },
+  botaoTexto: { color: '#fff', fontWeight: 'bold' },
 });
