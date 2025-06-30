@@ -9,7 +9,7 @@ export default function AnimatedInput({ label, value, onChangeText }) {
         Animated.timing(animatedIsFocused, {
             toValue: (isFocused || value !== '') ? 1 : 0,
             duration: 400,
-            easing: Easing.out(Easing.ease), 
+            easing: Easing.out(Easing.ease),
             useNativeDriver: false,
         }).start();
     }, [isFocused, value]);
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     inputBox: {
         position: 'relative',
         width: '90%',
-        marginBottom: 40,
+        marginBottom: 35,
     },
     input: {
         height: 50,

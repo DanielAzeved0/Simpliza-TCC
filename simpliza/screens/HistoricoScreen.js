@@ -20,30 +20,41 @@ export default function HistoricoScreen() {
     return transacoes.filter(item => item.tipo === filtro);
   };
 
-  const renderItem = ({ item }) => (
-    <View style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}>
-      <Text style={styles.descricao}>{item.titulo}</Text>
-      <Text style={styles.valor}>
-        {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
-      </Text>
-      <Text style={styles.categoria}>Categoria: {item.categoria}</Text>
-      <Text style={styles.data}>{item.data}</Text>
-    </View>
-  );
+const renderItem = ({ item }) => (
+  <View style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}>
+    <Text style={styles.categoria}>{item.categoria}</Text> 
+    <Text style={styles.descricao}>{item.titulo}</Text> 
+    <Text style={styles.valor}>
+      {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
+    </Text>
+    <Text style={styles.data}>{item.data}</Text>
+  </View>
+);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
 
       <View style={styles.filtros}>
-        <TouchableOpacity style={styles.botaoFiltro} onPress={() => setFiltro('todos')}>
-          <Text style={styles.textoFiltro}>Todos</Text>
+        <TouchableOpacity
+          style={[styles.botaoFiltro, filtro === 'todos' && styles.botaoAtivo]}
+          onPress={() => setFiltro('todos')}
+        >
+          <Text style={[styles.textoFiltro, filtro === 'todos' && styles.textoAtivo]}>Todos</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.botaoFiltro} onPress={() => setFiltro('ganho')}>
-          <Text style={styles.textoFiltro}>Ganhos</Text>
+
+        <TouchableOpacity
+          style={[styles.botaoFiltro, filtro === 'ganho' && styles.botaoAtivo]}
+          onPress={() => setFiltro('ganho')}
+        >
+          <Text style={[styles.textoFiltro, filtro === 'ganho' && styles.textoAtivo]}>Ganhos</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.botaoFiltro} onPress={() => setFiltro('gasto')}>
-          <Text style={styles.textoFiltro}>Gastos</Text>
+
+        <TouchableOpacity
+          style={[styles.botaoFiltro, filtro === 'gasto' && styles.botaoAtivo]}
+          onPress={() => setFiltro('gasto')}
+        >
+          <Text style={[styles.textoFiltro, filtro === 'gasto' && styles.textoAtivo]}>Gastos</Text>
         </TouchableOpacity>
       </View>
 
@@ -56,6 +67,7 @@ export default function HistoricoScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -68,6 +80,30 @@ const styles = StyleSheet.create({
     color: '#065f46',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  filtros: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 10,
+  },
+  botaoFiltro: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#333',
+    backgroundColor: 'transparent',
+  },
+  botaoAtivo: {
+    backgroundColor: '#333',
+  },
+  textoFiltro: {
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  textoAtivo: {
+    color: '#fff',
   },
   item: {
     padding: 16,
@@ -85,12 +121,19 @@ const styles = StyleSheet.create({
     borderLeftColor: '#dc2626',
   },
   descricao: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    marginTop: 4,
+    color: '#333',
   },
   valor: {
     fontSize: 14,
     marginTop: 4,
     color: '#333',
   },
+  categoria: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textTransform: 'uppercase', 
+
+  }
 });
