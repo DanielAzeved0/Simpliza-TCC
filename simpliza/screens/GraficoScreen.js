@@ -1,50 +1,76 @@
-import React from 'react';
-import { View, Text, Dimensions, StyleSheet } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Dimensions, StyleSheet, ActivityIndicator } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
+import { listarTransacoes } from '../firebase/firebaseService';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function GraficoScreen() {
-  const data = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-    datasets: [
-      {
-        data: [3000, 2500, 2700, 2900, 3200],
-        color: () => '#10b981',
-        strokeWidth: 2,
-      },
-      {
-        data: [1200, 1700, 1600, 1800, 1500],
-        color: () => '#dc2626',
-        strokeWidth: 2,
-      },
-    ],
-    legend: ['Ganhos', 'Gastos'],
+  const [dados, setDados] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const cores = [
+    '#10b981', '#dc2626', '#f59e0b', '#6366f1', '#14b8a6',
+    '#a855f7', '#f43f5e', '#3b82f6', '#eab308', '#84cc16'
+  ];
+
+  const carregarDados = async () => {
+    const transacoes = await listarTransacoes();
+
+    const resumoPorCategoria = {};
+
+    transacoes.forEach(transacao => {
+      const categoria = transacao.categoria || 'Outros';
+      const valor = parseFloat(transacao.valor) || 0;
+
+      if (!resumoPorCategoria[categoria]) {
+        resumoPorCategoria[categoria] = 0;
+      }
+
+      resumoPorCategoria[categoria] += valor;
+    });
+
+    const dadosGrafico = Object.keys(resumoPorCategoria).map((categoria, index) => {
+      const valor = resumoPorCategoria[categoria];
+      return {
+        name: categoria.toUpperCase(),
+        value: valor,
+        color: cores[index % cores.length],
+        legendFontColor: '#333',
+        legendFontSize: 14,
+      };
+    }).filter(item => !isNaN(item.value) && item.value > 0);
+
+    setDados(dadosGrafico);
+    setLoading(false);
   };
 
-  const config = {
-    backgroundGradientFrom: '#ffffff',
-    backgroundGradientTo: '#ffffff',
-    decimalPlaces: 2,
-    color: (opacity = 1) => `rgba(6, 95, 70, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-    propsForDots: {
-      r: '4',
-      strokeWidth: '2',
-      stroke: '#065f46',
-    },
-  };
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#065f46" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Gráfico Financeiro</Text>
-      <LineChart
-        data={data}
+      <Text style={styles.title}>Resumo por Categoria</Text>
+      <PieChart
+        data={dados}
         width={screenWidth - 32}
-        height={250}
-        chartConfig={config}
-        bezier
-        style={{ borderRadius: 16 }}
+        height={240}
+        accessor="value"
+        backgroundColor="transparent"
+        paddingLeft="10"
+        absolute
+        chartConfig={{
+          color: () => `#065f46`,
+        }}
       />
     </View>
   );
@@ -56,6 +82,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#e6f4ea',
     padding: 16,
     justifyContent: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e6f4ea',
   },
   title: {
     fontSize: 28,

@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { listarTransacoes } from '../firebase/firebaseService.js';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
+import { listarTransacoes, atualizarTransacao, excluirTransacao } from '../firebase/firebaseService.js';
 
 export default function HistoricoScreen() {
   const [transacoes, setTransacoes] = useState([]);
   const [filtro, setFiltro] = useState('todos');
+
+  const categorias = [
+    { label: 'Mercado', value: 'mercado' },
+    { label: 'Luz', value: 'luz' },
+    { label: 'Transporte', value: 'transporte' },
+    { label: 'Outros', value: 'outros' },
+  ];
 
   const carregarTransacoes = async () => {
     const resultado = await listarTransacoes();
@@ -15,21 +23,60 @@ export default function HistoricoScreen() {
     carregarTransacoes();
   }, []);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [registroSelecionado, setRegistroSelecionado] = useState(null);
+  const [tituloEdit, setTituloEdit] = useState('');
+  const [valorEdit, setValorEdit] = useState('');
+  const [categoriaEdit, setCategoriaEdit] = useState('');
+
+  const abrirModalEdicao = (item) => {
+    setRegistroSelecionado(item);
+    setTituloEdit(item.titulo);
+    setValorEdit(item.valor.toString());
+    setCategoriaEdit(item.categoria);
+    setModalVisible(true);
+  };
+
+  const salvarEdicao = async () => {
+    if (!registroSelecionado) return;
+
+    await atualizarTransacao(registroSelecionado.id, {
+      ...registroSelecionado,
+      titulo: tituloEdit,
+      valor: parseFloat(valorEdit),
+      categoria: categoriaEdit
+    });
+
+    setModalVisible(false);
+    carregarTransacoes();
+  };
+
+  const excluirRegistro = async () => {
+    if (!registroSelecionado) return;
+
+    await excluirTransacao(registroSelecionado.id);
+    setModalVisible(false);
+    carregarTransacoes();
+  };
+
   const filtrarTransacoes = () => {
     if (filtro === 'todos') return transacoes;
     return transacoes.filter(item => item.tipo === filtro);
   };
 
-const renderItem = ({ item }) => (
-  <View style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}>
-    <Text style={styles.categoria}>{item.categoria}</Text> 
-    <Text style={styles.descricao}>{item.titulo}</Text> 
-    <Text style={styles.valor}>
-      {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
-    </Text>
-    <Text style={styles.data}>{item.data}</Text>
-  </View>
-);
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => abrirModalEdicao(item)}
+      style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}
+    >
+      <Text style={styles.categoria}>{item.categoria}</Text>
+      <Text style={styles.descricao}>{item.titulo}</Text>
+      <Text style={styles.valor}>
+        {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
+      </Text>
+      <Text style={styles.data}>{item.data}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -64,6 +111,54 @@ const renderItem = ({ item }) => (
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+
+      <Modal
+        visible={modalVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Editar Transação</Text>
+
+            {registroSelecionado?.tipo === 'gasto' && (
+              <Dropdown
+                style={styles.modalInput}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                data={categorias}
+                labelField="label"
+                valueField="value"
+                placeholder="Categoria"
+                value={categoriaEdit}
+                onChange={item => setCategoriaEdit(item.value)}
+              />
+            )}
+
+            <TextInput
+              style={styles.modalInput}
+              value={tituloEdit}
+              onChangeText={setTituloEdit}
+              placeholder="Título"
+            />
+
+            <TextInput
+              style={styles.modalInput}
+              value={valorEdit}
+              onChangeText={setValorEdit}
+              placeholder="Valor"
+              keyboardType="numeric"
+            />
+
+            <View style={styles.modalButtons}>
+              <Button title="Cancelar" onPress={() => setModalVisible(false)} color="#6b7280" />
+              <Button title="Salvar" onPress={salvarEdicao} color="#10b981" />
+              <Button title="Excluir" onPress={excluirRegistro} color="#dc2626" />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -133,7 +228,45 @@ const styles = StyleSheet.create({
   categoria: {
     fontSize: 16,
     fontWeight: 'bold',
-    textTransform: 'uppercase', 
-
-  }
+    textTransform: 'uppercase',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    gap: 10,
+  },
+  placeholderStyle: {
+    color: '#999',
+    fontSize: 14,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    color: '#333',
+  },
 });

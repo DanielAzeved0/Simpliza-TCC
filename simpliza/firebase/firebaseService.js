@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 export const adicionarTransacao = async (tipo, titulo, valor, categoria) => {
   const data = new Date().toLocaleDateString();
@@ -26,4 +26,14 @@ export const listarTransacoes = async () => {
     console.error('Erro ao buscar transações: ', error);
     return [];
   }
+};
+
+export const atualizarTransacao = async (id, dadosAtualizados) => {
+  const docRef = doc(db, 'transacoes', id);
+  await updateDoc(docRef, dadosAtualizados);
+};
+
+export const excluirTransacao = async (id) => {
+  const docRef = doc(db, 'transacoes', id);
+  await deleteDoc(docRef);
 };

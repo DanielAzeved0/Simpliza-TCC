@@ -30,16 +30,17 @@ export default function GastoScreen() {
 
   return (
     <View style={styles.container}>
-            <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        data={categorias}
-        labelField="label"
-        valueField="value"
-        placeholder="Categorias"
-        value={categoria}
-        onChange={item => setCategoria(item.value)}    />
+        <Dropdown
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          data={categorias}
+          labelField="label"
+          valueField="value"
+          placeholder="Categorias"
+          value={categoria}
+          onChange={item => setCategoria(item.value)}    
+        />
 
       <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
       <AnimatedInput label="Valor" value={valor} onChangeText={setValor} />
