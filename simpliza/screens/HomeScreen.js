@@ -35,14 +35,6 @@ export default function HomeScreen({ navigation }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate('Inteligencia')}
-        >
-          <MaterialCommunityIcons name="robot" size={32} color="#065f46" />
-          <Text style={styles.cardText}>Inteligência Artificial</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.card}
           onPress={() => navigation.navigate('DAS')}
         >
           <MaterialCommunityIcons name="calculator-variant" size={32} color="#065f46" />
