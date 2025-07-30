@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions, Button } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { getHistorico } from '../firebase/firebaseService';
 import { format, parse } from 'date-fns';
-import { gerarDicasFinanceiras } from '../services/iaService';
 
 const screenWidth = Dimensions.get("window").width;
 const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe', '#dfe6e9'];
@@ -11,7 +10,6 @@ const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe',
 export default function GraficoScreen() {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dicas, setDicas] = useState('');
 
   useEffect(() => {
     async function carregar() {
@@ -63,12 +61,6 @@ export default function GraficoScreen() {
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`
   };
 
-  async function obterDicas() {
-    setDicas('Gerando dicas...');
-    const resposta = await gerarDicasFinanceiras(historico);
-    setDicas(resposta);
-  }
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.titulo}>Resumo Financeiro</Text>
@@ -96,12 +88,6 @@ export default function GraficoScreen() {
         style={styles.chart}
       />
 
-      <Button title="Gerar Dicas Financeiras" onPress={obterDicas} color="#065f46" />
-
-      {dicas ? (
-        <Text style={styles.dicas}>{dicas}</Text>
-      ) : null}
-
       {loading && <ActivityIndicator size="large" color="#000" />}
     </ScrollView>
   );
@@ -128,13 +114,5 @@ const styles = StyleSheet.create({
   chart: {
     marginBottom: 20,
     borderRadius: 16,
-  },
-  dicas: {
-    marginTop: 20,
-    fontSize: 16,
-    color: '#333',
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
   },
 });
