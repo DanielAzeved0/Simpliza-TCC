@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { BarChart, PieChart } from 'react-native-chart-kit';
-import { getHistorico } from '../firebase/firebaseService';
+import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
+import { getHistorico } from '../dataBase/firebaseService';
 import { format, parse } from 'date-fns';
 
 const screenWidth = Dimensions.get("window").width;
@@ -10,6 +10,7 @@ const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe',
 export default function GraficoScreen() {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tipoGrafico, setTipoGrafico] = useState('pizza'); // pizza, barra, linha
 
   useEffect(() => {
     async function carregar() {
@@ -63,30 +64,57 @@ export default function GraficoScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.titulo}>Resumo Financeiro</Text>
+      <Text style={styles.titulo}>Dashboard Financeiro</Text>
 
-      <BarChart
-        data={barChartData}
-        width={screenWidth - 40}
-        height={220}
-        chartConfig={chartConfig}
-        verticalLabelRotation={0}
-        showValuesOnTopOfBars={true}
-        style={styles.chart}
-      />
+      <View style={styles.switchContainer}>
+        <TouchableOpacity
+          style={[styles.switchButton, tipoGrafico === 'pizza' && styles.switchButtonActive]}
+          onPress={() => setTipoGrafico('pizza')}
+        >
+          <Text style={[styles.switchText, tipoGrafico === 'pizza' && styles.switchTextActive]}>Pizza</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.switchButton, tipoGrafico === 'barra' && styles.switchButtonActive]}
+          onPress={() => setTipoGrafico('barra')}
+        >
+          <Text style={[styles.switchText, tipoGrafico === 'barra' && styles.switchTextActive]}>Colunas</Text>
+        </TouchableOpacity>
+  {/* Removido botão de linha */}
+      </View>
 
-      <Text style={styles.subtitulo}>Despesas por Categoria</Text>
-      <PieChart
-        data={pieData}
-        width={screenWidth - 40}
-        height={220}
-        chartConfig={chartConfig}
-        accessor={'population'}
-        backgroundColor={'transparent'}
-        paddingLeft={'15'}
-        absolute
-        style={styles.chart}
-      />
+      {tipoGrafico === 'pizza' && (
+        <>
+          <Text style={styles.subtitulo}>Maiores Gastos do Mês</Text>
+          <PieChart
+            data={pieData}
+            width={screenWidth - 40}
+            height={220}
+            chartConfig={chartConfig}
+            accessor={'population'}
+            backgroundColor={'transparent'}
+            paddingLeft={'15'}
+            absolute
+            style={styles.chart}
+          />
+        </>
+      )}
+
+      {tipoGrafico === 'barra' && (
+        <>
+          <Text style={styles.subtitulo}>Ganhos x Gastos</Text>
+          <BarChart
+            data={barChartData}
+            width={screenWidth - 40}
+            height={220}
+            chartConfig={chartConfig}
+            verticalLabelRotation={0}
+            showValuesOnTopOfBars={true}
+            style={styles.chart}
+          />
+        </>
+      )}
+
+  {/* Removido gráfico de linha */}
 
       {loading && <ActivityIndicator size="large" color="#000" />}
     </ScrollView>
@@ -114,5 +142,32 @@ const styles = StyleSheet.create({
   chart: {
     marginBottom: 20,
     borderRadius: 16,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 8,
+  },
+  switchButton: {
+    backgroundColor: '#ecfdf5',
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: '#a7f3d0',
+  },
+  switchButtonActive: {
+    backgroundColor: '#065f46',
+    borderColor: '#065f46',
+  },
+  switchText: {
+    color: '#065f46',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  switchTextActive: {
+    color: '#fff',
   },
 });

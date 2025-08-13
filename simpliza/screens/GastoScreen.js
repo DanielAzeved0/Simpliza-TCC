@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import AnimatedInput from '../components/AnimatedInputGasto';
-import { adicionarTransacao } from '../firebase/firebaseService';
+import { adicionarTransacao } from '../dataBase/firebaseService';
 
 export default function GastoScreen() {
   const [titulo, setTitulo] = useState('');
@@ -43,7 +43,7 @@ export default function GastoScreen() {
         />
 
       <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
-      <AnimatedInput label="Valor" value={valor} onChangeText={setValor} />
+  <AnimatedInput label="Valor" value={valor} onChangeText={text => setValor(text.replace(/[^0-9.,]/g, ''))} keyboardType="numeric" />
 
    
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import AnimatedInput from '../components/AnimatedInputGanho.js';
-import { adicionarTransacao } from '../firebase/firebaseService.js';
+import { adicionarTransacao } from '../dataBase/firebaseService.js';
 
 export default function GanhoScreen() {
   const [titulo, setTitulo] = useState('');
@@ -24,11 +24,8 @@ export default function GanhoScreen() {
       <AnimatedInput
         label="Valor"
         value={valor}
-        onChangeText={(text) => {
-          const numericValue = text.replace(/[^0-9.]/g, '');
-          setValor(numericValue);
-        }}
-        keyboardType="numeric" 
+        onChangeText={text => setValor(text.replace(/[^0-9.,]/g, ''))}
+        keyboardType="numeric"
       />
 
       <TouchableOpacity style={styles.botao} onPress={handleSalvar}>

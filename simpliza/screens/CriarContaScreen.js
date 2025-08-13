@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase/firebaseConfig';
+import { auth, db } from '../dataBase/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
-import useGoogleAuth from '../firebase/googleAuth';
+import useGoogleAuth from '../dataBase/googleAuth';
 
 
 export default function CriarContaScreen({ navigation }) {
@@ -75,9 +75,6 @@ export default function CriarContaScreen({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.googleButton}>
-                <Text style={styles.googleText}>Conectar com o Google</Text>
-            </TouchableOpacity>
 
             <TouchableOpacity style={styles.button} onPress={criarConta}>
                 <Text style={styles.buttonText}>Criar conta</Text>

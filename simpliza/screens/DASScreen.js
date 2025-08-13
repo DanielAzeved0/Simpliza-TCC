@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, Dimensions } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { getHistorico } from '../firebase/firebaseService';
+import { getHistorico } from '../dataBase/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
 
 const screenWidth = Dimensions.get('window').width;

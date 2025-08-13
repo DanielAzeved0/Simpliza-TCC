@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { listarTransacoes, atualizarTransacao, excluirTransacao } from '../firebase/firebaseService.js';
+import { listarTransacoes, atualizarTransacao, excluirTransacao } from '../dataBase/firebaseService.js';
 
 export default function HistoricoScreen() {
   const [transacoes, setTransacoes] = useState([]);

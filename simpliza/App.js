@@ -18,36 +18,20 @@ import LoginScreen from './screens/LoginScreen.js';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [initialRoute, setInitialRoute] = useState(null);
-
-  useEffect(() => {
-    async function verificarLogin() {
-      const manterConectado = await AsyncStorage.getItem('manterConectado');
-      if (manterConectado === 'true') {
-        setInitialRoute('Home');
-      } else {
-        setInitialRoute('Inicio');
-      }
-    }
-    verificarLogin();
-  }, []);
-
-  if (!initialRoute) return null; // ou carregando...
-
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initialRoute}>
-        <Stack.Screen name="Inicio" component={InicioScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="CriarConta" component={CriarContaScreen} options={{ title: 'Criar Conta' }} />
-        <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login' }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Tela Inicial' }} />
-        <Stack.Screen name="NovoRegistro" component={NovoRegistroScreen} options={{ title: 'Novo Registro' }} />
-        <Stack.Screen name="Ganho" component={GanhoScreen} options={{ title: 'Ganho' }} />
-        <Stack.Screen name="Gasto" component={GastoScreen} options={{ title: 'Gasto' }} />
-        <Stack.Screen name="Historico" component={HistoricoScreen} options={{ title: 'Histórico de Ganhos e Gastos' }} />
-        <Stack.Screen name="Grafico" component={GraficoScreen} options={{ title: 'Gráfico Mensal' }} />
-        <Stack.Screen name="DAS" component={DASScreen} options={{ title: 'Cálculo do DAS' }} />
-        <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} options={{ title: 'Configurações do Aplicativo' }} />
+      <Stack.Navigator initialRouteName="Inicio" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Inicio" component={InicioScreen} />
+        <Stack.Screen name="CriarConta" component={CriarContaScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="NovoRegistro" component={NovoRegistroScreen} />
+        <Stack.Screen name="Ganho" component={GanhoScreen} />
+        <Stack.Screen name="Gasto" component={GastoScreen} />
+        <Stack.Screen name="Historico" component={HistoricoScreen} />
+        <Stack.Screen name="Grafico" component={GraficoScreen} />
+        <Stack.Screen name="DAS" component={DASScreen} />
+        <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
