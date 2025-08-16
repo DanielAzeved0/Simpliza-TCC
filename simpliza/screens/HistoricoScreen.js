@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { listarTransacoes, atualizarTransacao, excluirTransacao } from '../dataBase/firebaseService.js';
+import NavBar from '../components/navBar';
 
-export default function HistoricoScreen() {
+export default function HistoricoScreen({ navigation }) {
   const [transacoes, setTransacoes] = useState([]);
   const [filtro, setFiltro] = useState('todos');
 
@@ -78,87 +79,97 @@ export default function HistoricoScreen() {
     </TouchableOpacity>
   );
 
+  const handleNavBarPress = (screen) => {
+    if (screen === 'Inicio') navigation.navigate('Home');
+    else if (screen === 'Historico') navigation.navigate('Historico');
+    else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
+    else if (screen === 'Graficos') navigation.navigate('Grafico');
+    else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
+  };
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Histórico</Text>
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Histórico</Text>
 
-      <View style={styles.filtros}>
-        <TouchableOpacity
-          style={[styles.botaoFiltro, filtro === 'todos' && styles.botaoAtivo]}
-          onPress={() => setFiltro('todos')}
+        <View style={styles.filtros}>
+          <TouchableOpacity
+            style={[styles.botaoFiltro, filtro === 'todos' && styles.botaoAtivo]}
+            onPress={() => setFiltro('todos')}
+          >
+            <Text style={[styles.textoFiltro, filtro === 'todos' && styles.textoAtivo]}>Todos</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.botaoFiltro, filtro === 'ganho' && styles.botaoAtivo]}
+            onPress={() => setFiltro('ganho')}
+          >
+            <Text style={[styles.textoFiltro, filtro === 'ganho' && styles.textoAtivo]}>Ganhos</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.botaoFiltro, filtro === 'gasto' && styles.botaoAtivo]}
+            onPress={() => setFiltro('gasto')}
+          >
+            <Text style={[styles.textoFiltro, filtro === 'gasto' && styles.textoAtivo]}>Gastos</Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={filtrarTransacoes()}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
+
+        <Modal
+          visible={modalVisible}
+          animationType="fade"
+          transparent
+          onRequestClose={() => setModalVisible(false)}
         >
-          <Text style={[styles.textoFiltro, filtro === 'todos' && styles.textoAtivo]}>Todos</Text>
-        </TouchableOpacity>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Editar Transação</Text>
 
-        <TouchableOpacity
-          style={[styles.botaoFiltro, filtro === 'ganho' && styles.botaoAtivo]}
-          onPress={() => setFiltro('ganho')}
-        >
-          <Text style={[styles.textoFiltro, filtro === 'ganho' && styles.textoAtivo]}>Ganhos</Text>
-        </TouchableOpacity>
+              {registroSelecionado?.tipo === 'gasto' && (
+                <Dropdown
+                  style={styles.modalInput}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  data={categorias}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Categoria"
+                  value={categoriaEdit}
+                  onChange={item => setCategoriaEdit(item.value)}
+                />
+              )}
 
-        <TouchableOpacity
-          style={[styles.botaoFiltro, filtro === 'gasto' && styles.botaoAtivo]}
-          onPress={() => setFiltro('gasto')}
-        >
-          <Text style={[styles.textoFiltro, filtro === 'gasto' && styles.textoAtivo]}>Gastos</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={filtrarTransacoes()}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
-
-      <Modal
-        visible={modalVisible}
-        animationType="fade"
-        transparent
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Editar Transação</Text>
-
-            {registroSelecionado?.tipo === 'gasto' && (
-              <Dropdown
+              <TextInput
                 style={styles.modalInput}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                data={categorias}
-                labelField="label"
-                valueField="value"
-                placeholder="Categoria"
-                value={categoriaEdit}
-                onChange={item => setCategoriaEdit(item.value)}
+                value={tituloEdit}
+                onChangeText={setTituloEdit}
+                placeholder="Título"
               />
-            )}
 
-            <TextInput
-              style={styles.modalInput}
-              value={tituloEdit}
-              onChangeText={setTituloEdit}
-              placeholder="Título"
-            />
+              <TextInput
+                style={styles.modalInput}
+                value={valorEdit}
+                onChangeText={setValorEdit}
+                placeholder="Valor"
+                keyboardType="numeric"
+              />
 
-            <TextInput
-              style={styles.modalInput}
-              value={valorEdit}
-              onChangeText={setValorEdit}
-              placeholder="Valor"
-              keyboardType="numeric"
-            />
-
-            <View style={styles.modalButtons}>
-              <Button title="Cancelar" onPress={() => setModalVisible(false)} color="#6b7280" />
-              <Button title="Salvar" onPress={salvarEdicao} color="#10b981" />
-              <Button title="Excluir" onPress={excluirRegistro} color="#dc2626" />
+              <View style={styles.modalButtons}>
+                <Button title="Cancelar" onPress={() => setModalVisible(false)} color="#6b7280" />
+                <Button title="Salvar" onPress={salvarEdicao} color="#10b981" />
+                <Button title="Excluir" onPress={excluirRegistro} color="#dc2626" />
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      </View>
+      <NavBar onPress={handleNavBarPress} />
     </View>
   );
 }

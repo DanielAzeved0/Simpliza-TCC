@@ -3,10 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, Dimensions } 
 import { Dropdown } from 'react-native-element-dropdown';
 import { getHistorico } from '../dataBase/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
+import NavBar from '../components/navBar';
 
 const screenWidth = Dimensions.get('window').width;
 
-export default function DASScreen() {
+export default function DASScreen({ navigation }) {
   const [tipoEmpresa, setTipoEmpresa] = useState(null);
   const [tipoMEI, setTipoMEI] = useState(null);
   const [faturamento, setFaturamento] = useState(0);
@@ -62,87 +63,97 @@ export default function DASScreen() {
     }
   };
 
+  const handleNavBarPress = (screen) => {
+    if (screen === 'Inicio') navigation.navigate('Home');
+    else if (screen === 'Historico') navigation.navigate('Historico');
+    else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
+    else if (screen === 'Graficos') navigation.navigate('Grafico');
+    else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
+  };
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Cálculo do DAS</Text>
-        <TouchableOpacity onPress={() => setAjudaVisible(true)}>
-          <Ionicons name="help-circle-outline" size={28} color="#065f46" />
-        </TouchableOpacity>
-      </View>
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Cálculo do DAS</Text>
+          <TouchableOpacity onPress={() => setAjudaVisible(true)}>
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+          </TouchableOpacity>
+        </View>
 
-      <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholder}
-        selectedTextStyle={styles.selectedText}
-        data={opcoesEmpresa}
-        labelField="label"
-        valueField="value"
-        placeholder="Selecione o tipo de empresa"
-        value={tipoEmpresa}
-        onChange={item => {
-          setTipoEmpresa(item.value);
-          setTipoMEI(null);
-        }}
-      />
-
-      {tipoEmpresa === 'mei' && (
         <Dropdown
           style={styles.dropdown}
           placeholderStyle={styles.placeholder}
           selectedTextStyle={styles.selectedText}
-          data={opcoesMEI}
+          data={opcoesEmpresa}
           labelField="label"
           valueField="value"
-          placeholder="Selecione a categoria do MEI"
-          value={tipoMEI}
-          onChange={item => setTipoMEI(item.value)}
+          placeholder="Selecione o tipo de empresa"
+          value={tipoEmpresa}
+          onChange={item => {
+            setTipoEmpresa(item.value);
+            setTipoMEI(null);
+          }}
         />
-      )}
 
-      {dasValor && (
-        <View style={styles.resultadoBox}>
-          <Text style={styles.resultadoTexto}>Valor estimado do DAS: {dasValor}</Text>
-        </View>
-      )}
+        {tipoEmpresa === 'mei' && (
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholder}
+            selectedTextStyle={styles.selectedText}
+            data={opcoesMEI}
+            labelField="label"
+            valueField="value"
+            placeholder="Selecione a categoria do MEI"
+            value={tipoMEI}
+            onChange={item => setTipoMEI(item.value)}
+          />
+        )}
 
-      <TouchableOpacity
-        style={styles.linkBotao}
-        onPress={() => Linking.openURL('https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/pagamento-de-contribuicao-mensal/como-pagar-o-das')}
-      >
-        <Text style={styles.linkTexto}>Como pagar o seu DAS</Text>
-      </TouchableOpacity>
-
-      {(tipoEmpresa === 'me' || tipoEmpresa === 'epp') && (
-        <TouchableOpacity
-          onPress={() => Linking.openURL('https://www.jusbrasil.com.br/artigos/8-dicas-praticas-de-como-reduzir-imposto-do-simples-nacional/1590355552')}
-        >
-          <Text style={styles.reduzirTexto}>Como reduzir o imposto do Simples Nacional</Text>
-        </TouchableOpacity>
-      )}
-
-      <Modal
-        visible={ajudaVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setAjudaVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTexto}>
-              Você sabe o que é DAS? O Documento de Arrecadação do Simples Nacional é um guia simplificado de tributos que uma empresa optante pelo Simples Nacional deve pagar.
-              Para MEs e EPPs, o valor considera notas fiscais emitidas. Para o MEI, o pagamento é fixo por setor:
-              {'\n'}Comércio ou Indústria: R$71,60
-              {'\n'}Serviço: R$75,60
-              {'\n'}Comércio + Serviço: R$76,60
-              {'\n'}Para MEI, o pagamento é mensal, independente do faturamento.
-            </Text>
-            <TouchableOpacity style={styles.fecharBotao} onPress={() => setAjudaVisible(false)}>
-              <Text style={styles.fecharTexto}>Fechar</Text>
-            </TouchableOpacity>
+        {dasValor && (
+          <View style={styles.resultadoBox}>
+            <Text style={styles.resultadoTexto}>Valor estimado do DAS: {dasValor}</Text>
           </View>
-        </View>
-      </Modal>
+        )}
+
+        <TouchableOpacity
+          style={styles.linkBotao}
+          onPress={() => Linking.openURL('https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/pagamento-de-contribuicao-mensal/como-pagar-o-das')}
+        >
+          <Text style={styles.linkTexto}>Como pagar o seu DAS</Text>
+        </TouchableOpacity>
+
+        {(tipoEmpresa === 'me' || tipoEmpresa === 'epp') && (
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://www.jusbrasil.com.br/artigos/8-dicas-praticas-de-como-reduzir-imposto-do-simples-nacional/1590355552')}
+          >
+            <Text style={styles.reduzirTexto}>Como reduzir o imposto do Simples Nacional</Text>
+          </TouchableOpacity>
+        )}
+
+        <Modal
+          visible={ajudaVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setAjudaVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTexto}>
+                Você sabe o que é DAS? O Documento de Arrecadação do Simples Nacional é um guia simplificado de tributos que uma empresa optante pelo Simples Nacional deve pagar.
+                Para MEs e EPPs, o valor considera notas fiscais emitidas. Para o MEI, o pagamento é fixo por setor:
+                {'\n'}Comércio ou Indústria: R$71,60
+                {'\n'}Serviço: R$75,60
+                {'\n'}Comércio + Serviço: R$76,60
+                {'\n'}Para MEI, o pagamento é mensal, independente do faturamento.
+              </Text>
+              <TouchableOpacity style={styles.fecharBotao} onPress={() => setAjudaVisible(false)}>
+                <Text style={styles.fecharTexto}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
+      <NavBar onPress={handleNavBarPress} />
     </View>
   );
 }
