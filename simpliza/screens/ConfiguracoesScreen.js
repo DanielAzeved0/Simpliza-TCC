@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { logoutUser } from '../dataBase/logoutService';
+import { logoutUser } from '../dataBase/firebaseService';
 import { useNavigation } from '@react-navigation/native';
 
 export default function ConfiguracoesScreen() {
