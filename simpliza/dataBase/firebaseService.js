@@ -38,7 +38,7 @@ export async function getHistorico() {
 }
 
 // Função para adicionar uma nova transação à subcoleção do usuário logado
-export async function addTransacao(transacao) {
+export async function adicionarTransacao(transacao) {
   try {
     const user = auth.currentUser;
     if (!user) return null;

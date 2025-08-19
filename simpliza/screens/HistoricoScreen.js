@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { listarTransacoes, atualizarTransacao, excluirTransacao } from '../dataBase/firebaseService.js';
+import { getHistorico, updateTransacao, deleteTransacao } from '../dataBase/firebaseService.js';
 import NavBar from '../components/navBar';
 
 export default function HistoricoScreen({ navigation }) {
@@ -16,7 +16,7 @@ export default function HistoricoScreen({ navigation }) {
   ];
 
   const carregarTransacoes = async () => {
-    const resultado = await listarTransacoes();
+    const resultado = await getHistorico();
     setTransacoes(resultado);
   };
 
@@ -41,7 +41,7 @@ export default function HistoricoScreen({ navigation }) {
   const salvarEdicao = async () => {
     if (!registroSelecionado) return;
 
-    await atualizarTransacao(registroSelecionado.id, {
+    await updateTransacao(registroSelecionado.id, {
       ...registroSelecionado,
       titulo: tituloEdit,
       valor: parseFloat(valorEdit),
@@ -55,7 +55,7 @@ export default function HistoricoScreen({ navigation }) {
   const excluirRegistro = async () => {
     if (!registroSelecionado) return;
 
-    await excluirTransacao(registroSelecionado.id);
+    await deleteTransacao(registroSelecionado.id);
     setModalVisible(false);
     carregarTransacoes();
   };

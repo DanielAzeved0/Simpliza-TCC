@@ -27,7 +27,12 @@ export default function GraficoScreen({ navigation }) {
 
   const ganhos = historico.filter(i => i.tipo === 'ganho');
   const gastos = historico.filter(i => i.tipo === 'gasto');
-  const soma = arr => arr.reduce((acc, cur) => acc + Number(cur.valor || 0), 0);
+  const parseValor = v => {
+    if (typeof v === 'string') v = v.replace(',', '.');
+    const n = Number(v);
+    return isNaN(n) ? 0 : n;
+  };
+  const soma = arr => arr.reduce((acc, cur) => acc + parseValor(cur.valor), 0);
 
   const barChartData = {
     labels: ['Ganhos', 'Gastos'],
@@ -40,7 +45,7 @@ export default function GraficoScreen({ navigation }) {
 
   const categorias = {};
   gastos.forEach(item => {
-    categorias[item.categoria] = (categorias[item.categoria] || 0) + Number(item.valor || 0);
+    categorias[item.categoria] = (categorias[item.categoria] || 0) + parseValor(item.valor);
   });
 
   const pieData = Object.entries(categorias).map(([key, value], index) => ({
@@ -68,8 +73,8 @@ export default function GraficoScreen({ navigation }) {
     const data = item.data ? new Date(item.data) : null;
     if (data && data.getMonth) {
       const mes = data.getMonth();
-      if (item.tipo === 'ganho') ganhosPorMes[mes] += Number(item.valor || 0);
-      if (item.tipo === 'gasto') gastosPorMes[mes] += Number(item.valor || 0);
+      if (item.tipo === 'ganho') ganhosPorMes[mes] += parseValor(item.valor);
+      if (item.tipo === 'gasto') gastosPorMes[mes] += parseValor(item.valor);
     }
   });
   const lineChartData = {

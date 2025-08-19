@@ -11,7 +11,7 @@ export default function InicioScreen() {
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('CriarConta')}>
         <Text style={styles.buttonText}>Criar uma conta</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Login')}>
+  <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.replace('Login')}>
         <Text style={styles.secondaryButtonText}>Já tenho uma conta</Text>
       </TouchableOpacity>
     </View>
