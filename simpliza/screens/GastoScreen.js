@@ -26,7 +26,7 @@ export default function GastoScreen() {
       alert('Digite um valor válido!');
       return;
     }
-    adicionarTransacao({ tipo: 'gasto', titulo, valor: valorNumerico, categoria: "gasto" });
+    adicionarTransacao({ tipo: 'gasto', titulo, valor: valorNumerico, categoria });
     setTitulo('');
     setValor('');
     setCategoria(null);

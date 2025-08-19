@@ -17,7 +17,14 @@ export default function HistoricoScreen({ navigation }) {
 
   const carregarTransacoes = async () => {
     const resultado = await getHistorico();
-    setTransacoes(resultado);
+    // Ordena por data/hora decrescente (mais recente primeiro)
+    const ordenado = [...resultado].sort((a, b) => {
+      // Se data for string, converte para Date
+      const dataA = a.data ? new Date(a.data) : new Date(0);
+      const dataB = b.data ? new Date(b.data) : new Date(0);
+      return dataB - dataA;
+    });
+    setTransacoes(ordenado);
   };
 
   useEffect(() => {
@@ -65,19 +72,32 @@ export default function HistoricoScreen({ navigation }) {
     return transacoes.filter(item => item.tipo === filtro);
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => abrirModalEdicao(item)}
-      style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}
-    >
-      <Text style={styles.categoria}>{item.categoria}</Text>
-      <Text style={styles.descricao}>{item.titulo}</Text>
-      <Text style={styles.valor}>
-        {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
-      </Text>
-      <Text style={styles.data}>{item.data}</Text>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    // Formatar data/hora para exibição
+    let dataFormatada = '';
+    if (item.data) {
+      const d = new Date(item.data);
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const ano = d.getFullYear();
+      const hora = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      dataFormatada = `${dia}/${mes}/${ano} ${hora}:${min}`;
+    }
+    return (
+      <TouchableOpacity
+        onPress={() => abrirModalEdicao(item)}
+        style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}
+      >
+        <Text style={styles.categoria}>{item.categoria}</Text>
+        <Text style={styles.descricao}>{item.titulo}</Text>
+        <Text style={styles.valor}>
+          {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
+        </Text>
+        <Text style={styles.data}>{dataFormatada}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   const handleNavBarPress = (screen) => {
     if (screen === 'Inicio') navigation.navigate('Home');
