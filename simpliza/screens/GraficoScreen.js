@@ -1,5 +1,19 @@
+// Função para buscar dica do backend de IA
+async function fetchDicaIA(ganhos, gastos) {
+  try {
+  const response = await fetch('http://10.0.2.2:8000/dica', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ganhos, gastos })
+    });
+    const data = await response.json();
+    return data.dica || 'Não foi possível obter dica da IA.';
+  } catch (e) {
+    return 'Erro ao conectar com a IA.';
+  }
+}
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions, TouchableOpacity, Image } from 'react-native';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
 import { getHistorico } from '../dataBase/firebaseService';
 import NavBar from '../components/navBar';
@@ -10,6 +24,7 @@ const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe',
 export default function GraficoScreen({ navigation }) {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dicaIA, setDicaIA] = useState('');
 
   useEffect(() => {
     async function carregar() {
@@ -24,6 +39,15 @@ export default function GraficoScreen({ navigation }) {
     }
     carregar();
   }, []);
+
+  // Buscar dica da IA sempre que ganhos/gastos mudarem
+  useEffect(() => {
+    const ganhosTotais = soma(historico.filter(i => i.tipo === 'ganho'));
+    const gastosTotais = soma(historico.filter(i => i.tipo === 'gasto'));
+    if (!loading) {
+      fetchDicaIA(ganhosTotais, gastosTotais).then(setDicaIA);
+    }
+  }, [historico, loading]);
 
   const ganhos = historico.filter(i => i.tipo === 'ganho');
   const gastos = historico.filter(i => i.tipo === 'gasto');
@@ -102,6 +126,8 @@ export default function GraficoScreen({ navigation }) {
     else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
   };
 
+
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
@@ -176,6 +202,27 @@ export default function GraficoScreen({ navigation }) {
               <Text style={{ fontSize: 13 }}>Gastos</Text>
             </View>
           </View>
+        </View>
+
+        {/* Dica financeira gerada pela IA com botão de atualizar */}
+  <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 16, marginBottom: 24, borderColor: '#22c55e', borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 6 }}>Dica de economia (IA):</Text>
+            <Text style={{ fontSize: 15 }}>{dicaIA || 'Carregando dica da IA...'}</Text>
+          </View>
+          <TouchableOpacity
+            onPress={async () => {
+              const ganhosTotais = soma(historico.filter(i => i.tipo === 'ganho'));
+              const gastosTotais = soma(historico.filter(i => i.tipo === 'gasto'));
+              setDicaIA('Carregando dica da IA...');
+              const dica = await fetchDicaIA(ganhosTotais, gastosTotais);
+              setDicaIA(dica);
+            }}
+            style={{ marginLeft: 12 }}
+            accessibilityLabel="Atualizar dica da IA"
+          >
+            <Image source={require('../assets/download.png')} style={{ width: 28, height: 28 }} />
+          </TouchableOpacity>
         </View>
 
         {loading && <ActivityIndicator size="large" color="#000" />}

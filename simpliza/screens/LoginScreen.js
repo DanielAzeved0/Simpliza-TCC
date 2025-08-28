@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     checkboxLabel: { marginLeft: 8, fontSize: 16 },
     passwordContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 10, marginBottom: 15 },
     inputSenha: { flex: 1, padding: 14 },
-    button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center' },
+    button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 15 },
     buttonText: { color: 'white', fontSize: 18 },
     googleButton: { backgroundColor: '#fff', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 10, borderColor: '#ccc', borderWidth: 1 },
     googleText: { color: '#000' },
