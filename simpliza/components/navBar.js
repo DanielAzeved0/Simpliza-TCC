@@ -29,10 +29,10 @@ const NavBar = ({ onPress }) => {
         <Text style={styles.label}>Gráficos</Text>
       </TouchableOpacity>
 
-      {/* Configurações */}
-      <TouchableOpacity style={styles.iconButton} onPress={() => onPress && onPress('Configuracoes')}>
-        <Ionicons name="settings-outline" size={28} color="#065f46" />
-        <Text style={styles.label}>Configurações</Text>
+      {/* Cálculo do DAS */}
+      <TouchableOpacity style={styles.iconButton} onPress={() => onPress && onPress('DAS')}>
+        <MaterialCommunityIcons name="file-document-edit-outline" size={30} color="#065f46" />
+        <Text style={styles.label}>Cálculo DAS</Text>
       </TouchableOpacity>
     </View>
   );
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-  marginBottom: 38, // Sobe ainda mais a barra
+  marginBottom: 38,
   },
   iconButton: {
     alignItems: 'center',

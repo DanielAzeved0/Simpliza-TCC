@@ -73,9 +73,9 @@ export default function DASScreen({ navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={{ alignItems: 'center', marginBottom: 20 }}>
           <Text style={styles.title}>Cálculo do DAS</Text>
-          <TouchableOpacity onPress={() => setAjudaVisible(true)}>
+          <TouchableOpacity onPress={() => setAjudaVisible(true)} style={{ position: 'absolute', right: 0, top: 0 }}>
             <Ionicons name="help-circle-outline" size={28} color="#065f46" />
           </TouchableOpacity>
         </View>
@@ -165,14 +165,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    // Removido para centralização do título
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
+    textAlign: 'center',
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   dropdown: {
     borderWidth: 1,

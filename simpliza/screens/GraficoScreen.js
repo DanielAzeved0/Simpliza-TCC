@@ -123,7 +123,7 @@ export default function GraficoScreen({ navigation }) {
     else if (screen === 'Historico') navigation.navigate('Historico');
     else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
     else if (screen === 'Graficos') navigation.navigate('Grafico');
-    else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
+    else if (screen === 'DAS') navigation.navigate('DAS');
   };
 
 
@@ -131,7 +131,7 @@ export default function GraficoScreen({ navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
-        <Text style={styles.titulo}>Dashboard Financeiro</Text>
+  <Text style={styles.title}>Gráficos Financeiros</Text>
 
         {/* Gráfico de Pizza */}
         <View style={{ marginBottom: 32 }}>
@@ -238,10 +238,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#e6f4ea',
     padding: 20,
   },
-  titulo: {
-    fontSize: 22,
+  title: {
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#065f46',
     textAlign: 'center',
+    alignSelf: 'center',
     marginBottom: 20,
   },
   subtitulo: {
