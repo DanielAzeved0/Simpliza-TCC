@@ -13,7 +13,8 @@ async function fetchDicaIA(ganhos, gastos) {
   }
 }
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
 import { getHistorico } from '../dataBase/firebaseService';
 import NavBar from '../components/navBar';
@@ -221,7 +222,7 @@ export default function GraficoScreen({ navigation }) {
             style={{ marginLeft: 12 }}
             accessibilityLabel="Atualizar dica da IA"
           >
-            <Image source={require('../assets/download.png')} style={{ width: 28, height: 28 }} />
+            <MaterialIcons name="refresh" size={28} color="#22c55e" />
           </TouchableOpacity>
         </View>
 
