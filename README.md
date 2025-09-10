@@ -19,7 +19,6 @@
 
 ### 1. Pré-requisitos
 - Node.js e npm instalados
-- Python 3.8+ instalado
 - Android Studio (para emulador) ou dispositivo Android/iOS
 
 ### 2. Instalando dependências do app
