@@ -16,8 +16,6 @@ export default function DASScreen({ navigation }) {
 
   const opcoesEmpresa = [
     { label: 'Microempreendedor Individual (MEI)', value: 'mei' },
-    { label: 'MicroEmpresa (ME)', value: 'me' },
-    { label: 'Empresa de Pequeno Porte (EPP)', value: 'epp' },
   ];
 
   const opcoesMEI = [
@@ -36,10 +34,6 @@ export default function DASScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    calcularDAS();
-  }, [tipoEmpresa, tipoMEI, faturamento]);
-
-  const calcularDAS = () => {
     if (tipoEmpresa === 'mei') {
       switch (tipoMEI) {
         case 'comercio':
@@ -54,14 +48,10 @@ export default function DASScreen({ navigation }) {
         default:
           setDasValor(null);
       }
-    } else if (tipoEmpresa === 'me') {
-      setDasValor(`Aproximadamente R$ ${(faturamento * 0.06).toFixed(2)}`);
-    } else if (tipoEmpresa === 'epp') {
-      setDasValor(`Aproximadamente R$ ${(faturamento * 0.08).toFixed(2)}`);
     } else {
       setDasValor(null);
     }
-  };
+  }, [tipoEmpresa, tipoMEI]);
 
   const handleNavBarPress = (screen) => {
     if (screen === 'Inicio') navigation.navigate('Home');
@@ -122,13 +112,7 @@ export default function DASScreen({ navigation }) {
           <Text style={styles.linkTexto}>Como pagar o seu DAS</Text>
         </TouchableOpacity>
 
-        {(tipoEmpresa === 'me' || tipoEmpresa === 'epp') && (
-          <TouchableOpacity
-            onPress={() => Linking.openURL('https://www.jusbrasil.com.br/artigos/8-dicas-praticas-de-como-reduzir-imposto-do-simples-nacional/1590355552')}
-          >
-            <Text style={styles.reduzirTexto}>Como reduzir o imposto do Simples Nacional</Text>
-          </TouchableOpacity>
-        )}
+
 
         <Modal
           visible={ajudaVisible}

@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Button, Alert, ScrollView } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { Ionicons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import { getHistorico, updateTransacao, deleteTransacao } from '../dataBase/firebaseService.js';
 import NavBar from '../components/navBar';
 
 export default function HistoricoScreen({ navigation }) {
+  const [ajudaVisible, setAjudaVisible] = useState(false);
   const [transacoes, setTransacoes] = useState([]);
   const [filtro, setFiltro] = useState('todos');
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const categorias = [
-    { label: 'Mercado', value: 'mercado' },
+    { label: 'Comida', value: 'mercado' },
     { label: 'Luz', value: 'luz' },
     { label: 'Transporte', value: 'transporte' },
     { label: 'Outros', value: 'outros' },
@@ -25,7 +30,7 @@ export default function HistoricoScreen({ navigation }) {
       return dataB - dataA;
     });
     setTransacoes(ordenado);
-  };
+  }
 
   useEffect(() => {
     carregarTransacoes();
@@ -84,19 +89,38 @@ export default function HistoricoScreen({ navigation }) {
       const min = String(d.getMinutes()).padStart(2, '0');
       dataFormatada = `${dia}/${mes}/${ano} ${hora}:${min}`;
     }
+    const handleDeletePress = (id) => {
+      setDeleteId(id);
+      setConfirmVisible(true);
+    };
+    // Buscar o label da categoria
+    const categoriaLabel = categorias.find(c => c.value === item.categoria)?.label || item.categoria;
     return (
-      <TouchableOpacity
-        onPress={() => abrirModalEdicao(item)}
-        style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto]}
-      >
-        <Text style={styles.categoria}>{item.categoria}</Text>
-        <Text style={styles.descricao}>{item.titulo}</Text>
-        <Text style={styles.valor}>
-          {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
-        </Text>
-        <Text style={styles.data}>{dataFormatada}</Text>
-      </TouchableOpacity>
+      <View style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => abrirModalEdicao(item)}>
+          <Text style={styles.categoria}>{categoriaLabel}</Text>
+          {/* Mostrar descrição apenas se não for gasto ou se for gasto com categoria 'outros' */}
+          {!(item.tipo === 'gasto' && item.categoria !== 'outros') && (
+            <Text style={styles.descricao}>{item.titulo}</Text>
+          )}
+          <Text style={styles.valor}>
+            {item.tipo === 'ganho' ? '+' : '-'} R$ {item.valor}
+          </Text>
+          <Text style={styles.data}>{dataFormatada}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleDeletePress(item.id)} style={{ marginLeft: 10 }}>
+          <MaterialIcons name="delete" size={26} color="#065f46" />
+        </TouchableOpacity>
+      </View>
     );
+  } // fechamento correto da função renderItem
+
+  // Excluir direto sem abrir modal de edição
+  const excluirRegistroDireto = async (id) => {
+    await deleteTransacao(id);
+    setConfirmVisible(false);
+    setDeleteId(null);
+    carregarTransacoes();
   };
 
   const handleNavBarPress = (screen) => {
@@ -108,93 +132,215 @@ export default function HistoricoScreen({ navigation }) {
   };
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Histórico</Text>
-
-        <View style={styles.filtros}>
-          <TouchableOpacity
-            style={[styles.botaoFiltro, filtro === 'todos' && styles.botaoAtivo]}
-            onPress={() => setFiltro('todos')}
-          >
-            <Text style={[styles.textoFiltro, filtro === 'todos' && styles.textoAtivo]}>Todos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.botaoFiltro, filtro === 'ganho' && styles.botaoAtivo]}
-            onPress={() => setFiltro('ganho')}
-          >
-            <Text style={[styles.textoFiltro, filtro === 'ganho' && styles.textoAtivo]}>Ganhos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.botaoFiltro, filtro === 'gasto' && styles.botaoAtivo]}
-            onPress={() => setFiltro('gasto')}
-          >
-            <Text style={[styles.textoFiltro, filtro === 'gasto' && styles.textoAtivo]}>Gastos</Text>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={filtrarTransacoes()}
-          keyExtractor={item => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-
+      {/* Modal de confirmação minimalista */}
         <Modal
-          visible={modalVisible}
-          animationType="fade"
+          visible={confirmVisible}
           transparent
-          onRequestClose={() => setModalVisible(false)}
+          animationType="fade"
+          onRequestClose={() => setConfirmVisible(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Editar Transação</Text>
-
-              {registroSelecionado?.tipo === 'gasto' && (
-                <Dropdown
-                  style={styles.modalInput}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  data={categorias}
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Categoria"
-                  value={categoriaEdit}
-                  onChange={item => setCategoriaEdit(item.value)}
-                />
-              )}
-
-              <TextInput
-                style={styles.modalInput}
-                value={tituloEdit}
-                onChangeText={setTituloEdit}
-                placeholder="Título"
-              />
-
-              <TextInput
-                style={styles.modalInput}
-                value={valorEdit}
-                onChangeText={setValorEdit}
-                placeholder="Valor"
-                keyboardType="numeric"
-              />
-
-              <View style={styles.modalButtons}>
-                <Button title="Cancelar" onPress={() => setModalVisible(false)} color="#6b7280" />
-                <Button title="Salvar" onPress={salvarEdicao} color="#10b981" />
-                <Button title="Excluir" onPress={excluirRegistro} color="#dc2626" />
+          <View style={styles.confirmModalOverlay}>
+            <View style={styles.confirmModalContent}>
+              <MaterialIcons name="delete" size={38} color="#065f46" style={{ marginBottom: 10 }} />
+              <Text style={{ fontSize: 16, color: '#065f46', fontWeight: 'bold', marginBottom: 12, textAlign: 'center' }}>Deseja realmente excluir este registro?</Text>
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
+                <TouchableOpacity onPress={() => setConfirmVisible(false)} style={{ backgroundColor: '#fff', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 18, borderWidth: 1, borderColor: '#065f46' }}>
+                  <Text style={{ color: '#065f46', fontWeight: 'bold' }}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => excluirRegistroDireto(deleteId)} style={{ backgroundColor: '#065f46', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 18 }}>
+                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>Excluir</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
         </Modal>
-      </View>
+        <View style={styles.container}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={styles.title}>Histórico</Text>
+            <TouchableOpacity onPress={() => setAjudaVisible(true)}>
+              <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+            </TouchableOpacity>
+          </View>
+          <Modal
+            visible={ajudaVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setAjudaVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Sobre o Histórico</Text>
+                <Text style={{ marginBottom: 20 }}>
+                  Aqui você visualiza todos os seus registros de ganhos e gastos, pode editar ou excluir cada transação e filtrar por tipo. Toque em um item para editar ou excluir.
+                </Text>
+                <Button title="Fechar" onPress={() => setAjudaVisible(false)} color="#065f46" />
+              </View>
+            </View>
+          </Modal>
+
+          <View style={styles.filtros}>
+            <TouchableOpacity
+              style={[styles.botaoFiltro, filtro === 'todos' && styles.botaoAtivo]}
+              onPress={() => setFiltro('todos')}
+            >
+              <Text style={[styles.textoFiltro, filtro === 'todos' && styles.textoAtivo]}>Todos</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.botaoFiltro, filtro === 'ganho' && styles.botaoAtivo]}
+              onPress={() => setFiltro('ganho')}
+            >
+              <Text style={[styles.textoFiltro, filtro === 'ganho' && styles.textoAtivo]}>Ganhos</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.botaoFiltro, filtro === 'gasto' && styles.botaoAtivo]}
+              onPress={() => setFiltro('gasto')}
+            >
+              <Text style={[styles.textoFiltro, filtro === 'gasto' && styles.textoAtivo]}>Gastos</Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={filtrarTransacoes()}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+
+          {/* Modal de edição (verde claro, igual ao de confirmação) */}
+          <Modal
+            visible={modalVisible}
+            animationType="fade"
+            transparent
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.confirmModalOverlay}>
+              <View style={
+                registroSelecionado?.tipo === 'gasto'
+                  ? styles.gastoModalContent
+                  : styles.confirmModalContent
+              }>
+                <Text style={styles.modalTitle}>Editar Transação</Text>
+
+                {registroSelecionado?.tipo === 'gasto' && (
+                  <Dropdown
+                    style={styles.modalInputFull}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    data={categorias}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Categoria"
+                    value={categoriaEdit}
+                    onChange={item => setCategoriaEdit(item.value)}
+                  />
+                )}
+
+                <TextInput
+                  style={styles.modalInputFull}
+                  value={tituloEdit}
+                  onChangeText={setTituloEdit}
+                  placeholder="Título"
+                />
+
+                <TextInput
+                  style={styles.modalInputFull}
+                  value={valorEdit}
+                  onChangeText={setValorEdit}
+                  placeholder="Valor"
+                  keyboardType="numeric"
+                />
+
+                <View style={styles.modalButtonsRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.modalButton,
+                      registroSelecionado?.tipo === 'gasto' ? styles.cancelButtonRed : styles.cancelButton
+                    ]}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={
+                      registroSelecionado?.tipo === 'gasto' ? styles.cancelButtonTextRed : styles.cancelButtonText
+                    }>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.modalButton,
+                      registroSelecionado?.tipo === 'gasto' ? styles.saveButtonRed : styles.saveButton
+                    ]}
+                    onPress={salvarEdicao}
+                  >
+                    <Text style={
+                      registroSelecionado?.tipo === 'gasto' ? styles.saveButtonTextRed : styles.saveButtonText
+                    }>Salvar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+          </Modal>
+        </View>
       <NavBar onPress={handleNavBarPress} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  gastoModalContent: {
+    backgroundColor: '#fee2e2',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '80%',
+    borderWidth: 2,
+    borderColor: '#dc2626',
+    shadowColor: '#dc2626',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 10,
+    zIndex: 1000,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  cancelButtonRed: {
+    backgroundColor: '#dc2626',
+    marginRight: 8,
+  },
+  saveButtonRed: {
+    backgroundColor: '#f87171',
+    marginLeft: 8,
+  },
+  cancelButtonTextRed: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  saveButtonTextRed: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  confirmModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmModalContent: {
+    backgroundColor: '#d1fae5',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '80%',
+    borderWidth: 2,
+    borderColor: '#065f46',
+    shadowColor: '#065f46',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 10,
+    zIndex: 1000,
+  },
   container: {
     flex: 1,
     backgroundColor: '#e6f4ea',
@@ -286,11 +432,46 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
-  modalButtons: {
+  modalInputFull: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  modalButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-    gap: 10,
+    marginTop: 24,
+    width: '100%',
+    gap: 0,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  cancelButton: {
+    backgroundColor: '#065f46',
+    marginRight: 8,
+  },
+  saveButton: {
+    backgroundColor: '#10b981',
+    marginLeft: 8,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   placeholderStyle: {
     color: '#999',
@@ -301,3 +482,4 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
+// Fim do bloco de estilos

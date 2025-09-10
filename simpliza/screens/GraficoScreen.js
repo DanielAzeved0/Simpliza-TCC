@@ -1,19 +1,7 @@
-// Função para buscar dica do backend de IA
-async function fetchDicaIA(ganhos, gastos) {
-  try {
-  const response = await fetch('http://10.0.2.2:8000/dica', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ganhos, gastos })
-    });
-    const data = await response.json();
-    return data.dica || 'Não foi possível obter dica da IA.';
-  } catch (e) {
-    return 'Erro ao conectar com a IA.';
-  }
-}
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
+import { Modal } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
 import { getHistorico } from '../dataBase/firebaseService';
@@ -25,7 +13,7 @@ const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe',
 export default function GraficoScreen({ navigation }) {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dicaIA, setDicaIA] = useState('');
+  const [ajudaVisible, setAjudaVisible] = useState(false);
 
   useEffect(() => {
     async function carregar() {
@@ -34,21 +22,11 @@ export default function GraficoScreen({ navigation }) {
         setHistorico(dados);
       } catch (e) {
         setHistorico([]);
-      } finally {
-        setLoading(false);
       }
     }
     carregar();
   }, []);
 
-  // Buscar dica da IA sempre que ganhos/gastos mudarem
-  useEffect(() => {
-    const ganhosTotais = soma(historico.filter(i => i.tipo === 'ganho'));
-    const gastosTotais = soma(historico.filter(i => i.tipo === 'gasto'));
-    if (!loading) {
-      fetchDicaIA(ganhosTotais, gastosTotais).then(setDicaIA);
-    }
-  }, [historico, loading]);
 
   const ganhos = historico.filter(i => i.tipo === 'ganho');
   const gastos = historico.filter(i => i.tipo === 'gasto');
@@ -74,7 +52,7 @@ export default function GraficoScreen({ navigation }) {
   });
 
   const pieData = Object.entries(categorias).map(([key, value], index) => ({
-    name: key,
+    name: key === 'mercado' ? 'Comida' : key,
     population: value,
     color: cores[index % cores.length],
     legendFontColor: '#7F7F7F',
@@ -133,6 +111,32 @@ export default function GraficoScreen({ navigation }) {
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
   <Text style={styles.title}>Gráficos Financeiros</Text>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#065f46' }}>Gráficos</Text>
+          <TouchableOpacity onPress={() => setAjudaVisible(true)}>
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+          </TouchableOpacity>
+        </View>
+
+        <Modal
+          visible={ajudaVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setAjudaVisible(false)}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '90%' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Sobre os Gráficos</Text>
+              <Text style={{ marginBottom: 20 }}>
+                Aqui você visualiza gráficos dos seus ganhos e gastos. Use para acompanhar sua evolução financeira e identificar padrões.
+              </Text>
+              <TouchableOpacity style={{ alignSelf: 'center', backgroundColor: '#065f46', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8 }} onPress={() => setAjudaVisible(false)}>
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         {/* Gráfico de Pizza */}
         <View style={{ marginBottom: 32 }}>
@@ -204,28 +208,7 @@ export default function GraficoScreen({ navigation }) {
             </View>
           </View>
         </View>
-
-        {/* Dica financeira gerada pela IA com botão de atualizar */}
-  <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 16, marginBottom: 24, borderColor: '#22c55e', borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 6 }}>Dica de economia (IA):</Text>
-            <Text style={{ fontSize: 15 }}>{dicaIA || 'Carregando dica da IA...'}</Text>
-          </View>
-          <TouchableOpacity
-            onPress={async () => {
-              const ganhosTotais = soma(historico.filter(i => i.tipo === 'ganho'));
-              const gastosTotais = soma(historico.filter(i => i.tipo === 'gasto'));
-              setDicaIA('Carregando dica da IA...');
-              const dica = await fetchDicaIA(ganhosTotais, gastosTotais);
-              setDicaIA(dica);
-            }}
-            style={{ marginLeft: 12 }}
-            accessibilityLabel="Atualizar dica da IA"
-          >
-            <MaterialIcons name="refresh" size={28} color="#22c55e" />
-          </TouchableOpacity>
-        </View>
-
+        
         {loading && <ActivityIndicator size="large" color="#000" />}
       </ScrollView>
       <NavBar onPress={handleNavBarPress} />

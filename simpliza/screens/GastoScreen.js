@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TextInput } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import AnimatedInput from '../components/AnimatedInputGasto';
 import { adicionarTransacao } from '../dataBase/firebaseService';
 
 export default function GastoScreen() {
+  const [ajudaVisible, setAjudaVisible] = useState(false);
   const [titulo, setTitulo] = useState('');
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState(null);
 
+  // Função para formatar valor como moeda brasileira
+  const formatarValor = (text) => {
+    let v = text.replace(/\D/g, '');
+    if (!v) return '';
+    while (v.length < 3) v = '0' + v;
+    v = v.replace(/(\d+)(\d{2})$/, '$1,$2');
+    v = v.replace(/^0+(\d)/, '$1');
+    return v;
+  };
+
   const categorias = [
-    { label: 'Mercado', value: 'mercado' },
+    { label: 'Comida', value: 'mercado' },
     { label: 'Luz', value: 'luz' },
     { label: 'Transporte', value: 'transporte' },
     { label: 'Outros', value: 'outros' },
   ];
 
   const handleSalvar = () => {
-    if (!titulo || !valor || !categoria) {
+    if (!valor || !categoria || (categoria === 'outros' && !titulo)) {
       alert('Preencha todos os campos!');
       return;
     }
@@ -26,15 +38,41 @@ export default function GastoScreen() {
       alert('Digite um valor válido!');
       return;
     }
-    adicionarTransacao({ tipo: 'gasto', titulo, valor: valorNumerico, categoria });
+    // Se não for "outros", salva um título padrão igual ao nome da categoria
+    const tituloFinal = categoria === 'outros' ? titulo : categorias.find(c => c.value === categoria)?.label || '';
+    adicionarTransacao({ tipo: 'gasto', titulo: tituloFinal, valor: valorNumerico, categoria });
     setTitulo('');
     setValor('');
     setCategoria(null);
-    alert('Gasto registrado no Firebase!');
+    alert('Gasto registrado com sucesso!');
   };
 
   return (
     <View style={styles.container}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginBottom: 10 }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#dc2626' }}>Registrar Gasto</Text>
+        <TouchableOpacity onPress={() => setAjudaVisible(true)}>
+          <Ionicons name="help-circle-outline" size={28} color="#dc2626" />
+        </TouchableOpacity>
+      </View>
+      <Modal
+        visible={ajudaVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAjudaVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '90%' }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Sobre o Registro de Gasto</Text>
+            <Text style={{ marginBottom: 20 }}>
+              Aqui você pode registrar despesas, como contas, compras ou outros gastos. Preencha a categoria, descrição (se necessário) e valor para manter seu controle financeiro atualizado.
+            </Text>
+            <TouchableOpacity style={{ alignSelf: 'center', backgroundColor: '#dc2626', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8 }} onPress={() => setAjudaVisible(false)}>
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
         <Dropdown
           style={styles.dropdown}
           placeholderStyle={styles.placeholderStyle}
@@ -47,7 +85,11 @@ export default function GastoScreen() {
           onChange={item => setCategoria(item.value)}    
         />
 
-      <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
+
+      {/* Campo de descrição só aparece se categoria for 'outros' */}
+      {categoria === 'outros' && (
+        <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
+      )}
 
       {/* Campo de valor com cifrão fixo */}
       <View style={styles.valorContainer}>
@@ -55,7 +97,7 @@ export default function GastoScreen() {
         <TextInput
           style={styles.valorInput}
           value={valor}
-          onChangeText={text => setValor(text.replace(/[^0-9,]/g, ''))}
+          onChangeText={text => setValor(formatarValor(text))}
           keyboardType="numeric"
           placeholder="0,00"
           maxLength={10}
