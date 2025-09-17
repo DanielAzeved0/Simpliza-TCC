@@ -173,7 +173,9 @@ export default function HistoricoScreen({ navigation }) {
                 <Text style={{ marginBottom: 20 }}>
                   Aqui você visualiza todos os seus registros de ganhos e gastos, pode editar ou excluir cada transação e filtrar por tipo. Toque em um item para editar ou excluir.
                 </Text>
-                <Button title="Fechar" onPress={() => setAjudaVisible(false)} color="#065f46" />
+                <TouchableOpacity style={{ alignSelf: 'center', backgroundColor: '#065f46', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8, justifyContent: 'center', alignItems: 'center' }} onPress={() => setAjudaVisible(false)}>
+                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>Fechar</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Modal>
