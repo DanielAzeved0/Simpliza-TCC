@@ -1,5 +1,5 @@
 // LoginScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Checkbox, Provider as PaperProvider } from 'react-native-paper';
@@ -15,6 +15,14 @@ export default function LoginScreen({ navigation }) {
     const [manterConectado, setManterConectado] = useState(false);
 
     const { promptAsync, request } = useGoogleAuth(navigation);
+        const [consentido, setConsentido] = useState(false);
+
+        useEffect(() => {
+            (async () => {
+                const v = await AsyncStorage.getItem('consentimentoLGPD');
+                setConsentido(v === 'true');
+            })();
+        }, []);
 
     const login = async () => {
         try {
@@ -65,7 +73,10 @@ export default function LoginScreen({ navigation }) {
 
                 <TouchableOpacity
                     style={styles.googleButton}
-                    onPress={() => promptAsync()}
+                    onPress={async () => {
+                        if (!consentido) return Alert.alert('Consentimento', 'Você precisa aceitar a política de privacidade antes de usar login via Google.');
+                        promptAsync();
+                    }}
                     disabled={!request}
                 >
                     <Text style={styles.googleText}>Conectar com o Google</Text>

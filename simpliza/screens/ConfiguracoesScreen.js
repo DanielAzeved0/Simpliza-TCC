@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { logoutUser } from '../dataBase/firebaseService';
+import { exportUserData, deleteUserDataAndAccount } from '../dataBase/firebaseService';
 import { useNavigation } from '@react-navigation/native';
 
 export default function ConfiguracoesScreen() {
@@ -12,6 +13,38 @@ export default function ConfiguracoesScreen() {
     } else {
       Alert.alert('Erro', 'Não foi possível sair da conta.');
     }
+  };
+
+  const handleExport = async () => {
+    const data = await exportUserData();
+    if (!data) return Alert.alert('Erro', 'Não foi possível exportar seus dados.');
+    // Exibe JSON simples para o usuário — em app real, oferecer download ou envio por e-mail.
+    navigation.navigate('Privacy');
+    Alert.alert('Exportação', 'Seus dados foram coletados para exportação. (Ver saída no console)');
+    console.log('Exported user data:', JSON.stringify(data, null, 2));
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir todos os seus dados e a conta? Esta ação é irreversível.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          style: 'destructive',
+          onPress: async () => {
+            const ok = await deleteUserDataAndAccount();
+            if (ok) {
+              Alert.alert('Pronto', 'Sua conta e dados foram excluídos.');
+              navigation.replace('Inicio');
+            } else {
+              Alert.alert('Erro', 'Não foi possível excluir sua conta agora.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -73,6 +106,12 @@ export default function ConfiguracoesScreen() {
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.85}>
           <Text style={styles.logoutText}>Sair</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: '#0a84ff', marginTop: 12 }]} onPress={handleExport} activeOpacity={0.85}>
+          <Text style={styles.logoutText}>Ler demos de uso de dados</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: '#e11d48', marginTop: 12 }]} onPress={handleDelete} activeOpacity={0.85}>
+          <Text style={styles.logoutText}>Solicitar exclusão de dados e conta</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

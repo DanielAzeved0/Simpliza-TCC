@@ -14,6 +14,7 @@ import ConfiguracoesScreen from './screens/ConfiguracoesScreen.js';
 import InicioScreen from './screens/InicioScreen.js';
 import CriarContaScreen from './screens/CriarContaScreen.js';
 import LoginScreen from './screens/LoginScreen.js';
+import PrivacyScreen from './screens/PrivacyScreen.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,7 @@ export default function App() {
         <Stack.Screen name="Grafico" component={GraficoScreen} />
         <Stack.Screen name="DAS" component={DASScreen} />
         <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
+        <Stack.Screen name="Privacy" component={PrivacyScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

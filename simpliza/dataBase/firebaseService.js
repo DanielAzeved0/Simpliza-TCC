@@ -15,6 +15,8 @@ import {
 
 // Importa a função `signOut` para realizar o logout
 import { signOut } from 'firebase/auth';
+import { deleteUser } from 'firebase/auth';
+import { getDoc, deleteField } from 'firebase/firestore';
 
 // Importa a função `parse` da biblioteca date-fns para manipulação de datas
 import { parse } from 'date-fns'; // Interpreta datas no formato dd/MM/yyyy
@@ -109,5 +111,53 @@ export async function logoutUser() {
   } catch (error) {
     console.error('Erro ao realizar logout:', error.message); // Exibe o erro no console
     return false; // Retorna false em caso de erro
+  }
+}
+
+// Exporta todos os dados do usuário como objeto (portabilidade)
+export async function exportUserData() {
+  try {
+    const user = auth.currentUser;
+    if (!user) return null;
+    const userDocRef = doc(db, 'usuarios', user.uid);
+    const userSnapshot = await getDoc(userDocRef);
+    const data = userSnapshot.exists() ? userSnapshot.data() : {};
+
+    // Buscar transações
+    const transacoesRef = collection(db, 'usuarios', user.uid, 'transacoes');
+    const snapshot = await getDocs(transacoesRef);
+    const transacoes = [];
+    snapshot.forEach(docSnap => transacoes.push({ id: docSnap.id, ...docSnap.data() }));
+
+    return { user: { uid: user.uid, ...data }, transacoes };
+  } catch (error) {
+    console.error('Erro ao exportar dados do usuário:', error);
+    return null;
+  }
+}
+
+// Deleta todos os dados do Firestore do usuário e em seguida exclui a conta Auth
+export async function deleteUserDataAndAccount() {
+  try {
+    const user = auth.currentUser;
+    if (!user) return false;
+
+    // Deletar transações
+    const transacoesRef = collection(db, 'usuarios', user.uid, 'transacoes');
+    const snapshot = await getDocs(transacoesRef);
+    const deletes = [];
+    snapshot.forEach(docSnap => deletes.push(deleteDoc(doc(db, 'usuarios', user.uid, 'transacoes', docSnap.id))));
+    await Promise.all(deletes);
+
+    // Deletar documento do usuário
+    await deleteDoc(doc(db, 'usuarios', user.uid));
+
+    // Deletar conta do Auth
+    await deleteUser(user);
+
+    return true;
+  } catch (error) {
+    console.error('Erro ao excluir dados/conta do usuário:', error);
+    return false;
   }
 }

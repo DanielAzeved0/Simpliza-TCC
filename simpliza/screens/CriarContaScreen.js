@@ -1,11 +1,12 @@
 // CriarContaScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../dataBase/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import useGoogleAuth from '../dataBase/googleAuth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function CriarContaScreen({ navigation }) {
@@ -16,6 +17,14 @@ export default function CriarContaScreen({ navigation }) {
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
     const { promptAsync, request } = useGoogleAuth(navigation);
+        const [consentido, setConsentido] = useState(false);
+
+        useEffect(() => {
+            (async () => {
+                const v = await AsyncStorage.getItem('consentimentoLGPD');
+                setConsentido(v === 'true');
+            })();
+        }, []);
 
     const criarConta = async () => {
         if (senha.length < 8) {
@@ -82,7 +91,10 @@ export default function CriarContaScreen({ navigation }) {
 
             <TouchableOpacity
                 style={styles.googleButton}
-                onPress={() => promptAsync()}
+                onPress={async () => {
+                    if (!consentido) return Alert.alert('Consentimento', 'Você precisa aceitar a política de privacidade antes de usar login via Google.');
+                    promptAsync();
+                }}
                 disabled={!request}
             >
                 <Text style={styles.googleText}>Conectar com o Google</Text>
