@@ -107,8 +107,8 @@ export default function ConfiguracoesScreen() {
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.85}>
           <Text style={styles.logoutText}>Sair</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: '#0a84ff', marginTop: 12 }]} onPress={handleExport} activeOpacity={0.85}>
-          <Text style={styles.logoutText}>Ler demos de uso de dados</Text>
+        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: '#3ab12ff3', marginTop: 12 }]} onPress={handleExport} activeOpacity={0.85}>
+          <Text style={styles.logoutText}>Ler termos de uso de dados</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.logoutButton, { backgroundColor: '#e11d48', marginTop: 12 }]} onPress={handleDelete} activeOpacity={0.85}>
           <Text style={styles.logoutText}>Solicitar exclusão de dados e conta</Text>
