@@ -50,7 +50,7 @@ export default function GastoScreen() {
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginBottom: 10 }}>
-        <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#dc2626' }}>Registrar Gasto</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#dc2626', alignSelf: 'flex-start' }}> Registrar Gasto </Text>
         <TouchableOpacity onPress={() => setAjudaVisible(true)}>
           <Ionicons name="help-circle-outline" size={28} color="#dc2626" />
         </TouchableOpacity>

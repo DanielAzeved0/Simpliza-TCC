@@ -41,7 +41,7 @@ export default function GanhoScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginBottom: 10 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginBottom: 10, padding: 40}}>
         <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#065f46' }}>Registrar Ganho</Text>
         <TouchableOpacity onPress={() => setAjudaVisible(true)}>
           <Ionicons name="help-circle-outline" size={28} color="#065f46" />
@@ -91,7 +91,7 @@ export default function GanhoScreen() {
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#e6f4ea', alignItems: 'center', paddingTop: 50 },
+  container: { flex: 1, backgroundColor: '#e6f4ea', alignItems: 'center', paddingTop: 60 },
   valorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -119,7 +119,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     padding: 0,
   },
-  botao: { backgroundColor: '#10b981', padding: 15, borderRadius: 10, marginTop: 20 },
-  botaoTexto: { color: '#fff', fontWeight: 'bold' },
+  botao: { 
+    backgroundColor: '#10b981', 
+    padding: 15, 
+    borderRadius: 10, 
+    marginTop: 20, 
+    width: '90%', 
+    alignItems: 'center' 
+  },
+  botaoTexto: { 
+    color: '#fff', 
+    fontWeight: 'bold'
+  },
 });
 

@@ -173,7 +173,7 @@ export default function HistoricoScreen({ navigation }) {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text style={styles.title}>Histórico</Text>
           <TouchableOpacity onPress={() => setAjudaVisible(true)}>
-            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+            <Ionicons name="help-circle-outline" size={28} color="#065f46"  paddingTop="50" />
           </TouchableOpacity>
         </View>
         <Modal
@@ -363,6 +363,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
+    paddingTop: 60,
     fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',

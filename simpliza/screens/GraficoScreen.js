@@ -110,12 +110,11 @@ export default function GraficoScreen({ navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
-  <Text style={styles.title}>Gráficos Financeiros</Text>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#065f46' }}>Gráficos</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#065f46', paddingTop: 60 }}>Gráficos</Text>
           <TouchableOpacity onPress={() => setAjudaVisible(true)}>
-            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" paddingTop="65"/>
           </TouchableOpacity>
         </View>
 
