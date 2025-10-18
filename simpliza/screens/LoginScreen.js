@@ -42,7 +42,9 @@ export default function LoginScreen({ navigation }) {
                 <Text style={styles.title}>LOGIN</Text>
 
 
-                <TextInput style={styles.input} placeholder="E-MAIL" value={email} onChangeText={setEmail} autoCapitalize="none" />
+                <Text style={styles.label}>E-MAIL</Text>
+                <TextInput style={styles.input} placeholder="E-MAIL" value={email} onChangeText={setEmail} autoCapitalize="none" placeholderTextColor="#222" />
+                <Text style={styles.label}>SENHA</Text>
                 <View style={styles.passwordContainer}>
                     <TextInput
                         style={styles.inputSenha}
@@ -50,6 +52,7 @@ export default function LoginScreen({ navigation }) {
                         secureTextEntry={!mostrarSenha}
                         value={senha}
                         onChangeText={setSenha}
+                        placeholderTextColor="#222"
                     />
                     <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
                         <Ionicons name={mostrarSenha ? 'eye-outline' : 'eye-off-outline'} size={24} color="gray" />
@@ -108,4 +111,5 @@ const styles = StyleSheet.create({
     googleText: { color: '#000' },
     cadastroButton: { marginTop: 10, alignItems: 'center' },
     cadastroText: { color: '#065f46', fontWeight: 'bold', fontSize: 16, textDecorationLine: 'underline' },
+    label: { fontWeight: 'bold', color: '#222', fontSize: 16, marginBottom: 4, marginLeft: 2 },
 });

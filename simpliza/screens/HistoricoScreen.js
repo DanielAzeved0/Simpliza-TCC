@@ -122,6 +122,7 @@ export default function HistoricoScreen({ navigation }) {
     else if (screen === 'Historico') navigation.navigate('Historico');
     else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
     else if (screen === 'Graficos') navigation.navigate('Grafico');
+    else if (screen === 'DAS') navigation.navigate('DAS');
     else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
   };
 

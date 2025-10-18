@@ -1,4 +1,4 @@
-// firebase/googleAuth.js
+
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect } from 'react';
