@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth, db } from './firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -29,6 +30,9 @@ export default function useGoogleAuth(navigation) {
           email: user.email,
           uid: user.uid,
         }, { merge: true });
+
+        // Salvar preferência para manter conectado (padrão para login Google)
+        await AsyncStorage.setItem('manterConectado', 'true');
 
         navigation.replace('Home');
       }

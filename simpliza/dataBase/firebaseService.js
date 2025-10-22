@@ -17,6 +17,7 @@ import {
 import { signOut } from 'firebase/auth';
 import { deleteUser } from 'firebase/auth';
 import { getDoc, deleteField } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Importa a função `parse` da biblioteca date-fns para manipulação de datas
 import { parse } from 'date-fns'; // Interpreta datas no formato dd/MM/yyyy
@@ -105,6 +106,9 @@ export async function getTransacoesFiltradas(campo, operador, valor) {
 // Função para realizar o logout do usuário autenticado
 export async function logoutUser() {
   try {
+    // Limpar dados de persistência local
+    await AsyncStorage.removeItem('manterConectado');
+    
     await signOut(auth); // Realiza o logout usando o serviço de autenticação do Firebase
     console.log('Logout realizado com sucesso.');
     return true; // Retorna true se o logout for bem-sucedido
@@ -159,5 +163,62 @@ export async function deleteUserDataAndAccount() {
   } catch (error) {
     console.error('Erro ao excluir dados/conta do usuário:', error);
     return false;
+  }
+}
+
+// Função para atualizar o status de verificação de email do usuário
+export async function atualizarStatusVerificacaoEmail() {
+  try {
+    const user = auth.currentUser;
+    if (!user) return false;
+    
+    // Recarregar dados do usuário para obter status atualizado
+    await user.reload();
+    
+    // Atualizar no Firestore
+    const userDocRef = doc(db, 'usuarios', user.uid);
+    await updateDoc(userDocRef, {
+      emailVerificado: user.emailVerified
+    });
+    
+    return user.emailVerified;
+  } catch (error) {
+    console.error('Erro ao atualizar status de verificação:', error);
+    return false;
+  }
+}
+
+// Função para reenviar email de verificação com controle de rate limiting
+export async function reenviarEmailVerificacao() {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('Usuário não está logado');
+    }
+
+    if (user.emailVerified) {
+      throw new Error('Email já foi verificado');
+    }
+
+    // Configurações personalizadas para o email
+    const actionCodeSettings = {
+      url: `https://simpliza-33e9a.firebaseapp.com/?email=${encodeURIComponent(user.email)}`,
+      handleCodeInApp: false,
+    };
+
+    // Importar sendEmailVerification aqui para evitar problemas de importação circular
+    const { sendEmailVerification } = await import('firebase/auth');
+    await sendEmailVerification(user, actionCodeSettings);
+
+    // Atualizar timestamp do último email enviado
+    const userDocRef = doc(db, 'usuarios', user.uid);
+    await updateDoc(userDocRef, {
+      ultimoEmailEnviado: new Date().toISOString()
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Erro ao reenviar email:', error);
+    throw error;
   }
 }

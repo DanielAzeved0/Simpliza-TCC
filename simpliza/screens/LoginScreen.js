@@ -27,12 +27,23 @@ export default function LoginScreen({ navigation }) {
     const login = async () => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+            // ...existing code...
             if (manterConectado) {
                 await AsyncStorage.setItem('manterConectado', 'true');
             }
             navigation.replace('Home');
         } catch (error) {
-            Alert.alert('Erro', error.message);
+            let errorMessage = 'Erro ao fazer login';
+            
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = 'Usuário não encontrado';
+            } else if (error.code === 'auth/wrong-password') {
+                errorMessage = 'Senha incorreta';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = 'Email inválido';
+            }
+            
+            Alert.alert('Erro', errorMessage);
         }
     };
 
@@ -43,16 +54,26 @@ export default function LoginScreen({ navigation }) {
 
 
                 <Text style={styles.label}>E-MAIL</Text>
-                <TextInput style={styles.input} placeholder="E-MAIL" value={email} onChangeText={setEmail} autoCapitalize="none" placeholderTextColor="#222" />
+                <TextInput 
+                    style={styles.input} 
+                    placeholder="Digite seu e-mail" 
+                    value={email} 
+                    onChangeText={setEmail} 
+                    autoCapitalize="none" 
+                    placeholderTextColor="#888888"
+                    keyboardType="email-address"
+                    autoComplete="email"
+                />
                 <Text style={styles.label}>SENHA</Text>
                 <View style={styles.passwordContainer}>
                     <TextInput
                         style={styles.inputSenha}
-                        placeholder="SENHA"
+                        placeholder="Digite sua senha"
                         secureTextEntry={!mostrarSenha}
                         value={senha}
                         onChangeText={setSenha}
-                        placeholderTextColor="#222"
+                        placeholderTextColor="#888888"
+                        autoComplete="password"
                     />
                     <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
                         <Ionicons name={mostrarSenha ? 'eye-outline' : 'eye-off-outline'} size={24} color="gray" />
@@ -100,11 +121,30 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#e6f4ea', justifyContent: 'center', padding: 20 },
     title: { fontSize: 28, fontWeight: 'bold', marginBottom: 30, color: '#2f4f4f', textAlign: 'center' },
-    input: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 15 },
+    input: { 
+        backgroundColor: '#fff', 
+        padding: 14, 
+        borderRadius: 10, 
+        marginBottom: 15,
+        fontSize: 16,
+        color: '#333333'
+    },
     checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-    checkboxLabel: { marginLeft: 8, fontSize: 16 },
-    passwordContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 10, marginBottom: 15 },
-    inputSenha: { flex: 1, padding: 14 },
+    checkboxLabel: { marginLeft: 8, fontSize: 16, color: '#333333' },
+    passwordContainer: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: '#fff', 
+        borderRadius: 10, 
+        paddingHorizontal: 10, 
+        marginBottom: 15 
+    },
+    inputSenha: { 
+        flex: 1, 
+        padding: 14,
+        fontSize: 16,
+        color: '#333333'
+    },
     button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 15 },
     buttonText: { color: 'white', fontSize: 18 },
     googleButton: { backgroundColor: '#fff', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 10, borderColor: '#ccc', borderWidth: 1 },

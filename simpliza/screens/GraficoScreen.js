@@ -52,11 +52,13 @@ export default function GraficoScreen({ navigation }) {
   });
 
   const pieData = Object.entries(categorias).map(([key, value], index) => ({
-    name: key === 'mercado' ? 'Comida' : key,
+    name: key === 'mercado' ? 'comida' : key,
     population: value,
     color: cores[index % cores.length],
     legendFontColor: '#7F7F7F',
-    legendFontSize: 15
+    legendFontSize: 15,
+    categoria: key === 'mercado' ? 'comida' : key,
+    valor: value
   }));
 
   const chartConfig = {
@@ -65,7 +67,10 @@ export default function GraficoScreen({ navigation }) {
     backgroundGradientTo: '#e6f4ea',
     decimalPlaces: 2,
     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    propsForLabels: {
+      fontSize: 12,
+    }
   };
 
   // Dados para o gráfico de linhas
@@ -155,7 +160,7 @@ export default function GraficoScreen({ navigation }) {
             {pieData.map((item, idx) => (
               <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12, marginBottom: 4 }}>
                 <View style={{ width: 12, height: 12, backgroundColor: item.color, marginRight: 4, borderRadius: 2 }} />
-                <Text style={{ fontSize: 13 }}>{item.name}</Text>
+                <Text style={{ fontSize: 13 }}>{item.categoria}: R$ {item.valor.toFixed(0)}</Text>
               </View>
             ))}
           </View>
@@ -169,7 +174,10 @@ export default function GraficoScreen({ navigation }) {
               data={barChartData}
               width={Math.max(screenWidth, 80 * barChartData.labels.length)}
               height={240}
-              chartConfig={chartConfig}
+              chartConfig={{
+                ...chartConfig,
+                formatTopLabelValue: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`
+              }}
               verticalLabelRotation={0}
               showValuesOnTopOfBars={true}
               style={[styles.chart, { minWidth: screenWidth - 40 }]}

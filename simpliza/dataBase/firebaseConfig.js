@@ -1,7 +1,8 @@
 // Importa as funções necessárias do SDK do Firebase
 import { initializeApp } from 'firebase/app'; // Inicializa o aplicativo Firebase
 import { getFirestore } from 'firebase/firestore'; // Obtém o serviço Firestore para banco de dados
-import { getAuth } from 'firebase/auth'; // Obtém o serviço de autenticação do Firebase
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth'; // Obtém o serviço de autenticação do Firebase
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configuração do Firebase para conectar o aplicativo ao projeto no Firebase
 const firebaseConfig = {
@@ -16,8 +17,10 @@ const firebaseConfig = {
 // Inicializa o aplicativo Firebase com a configuração fornecida
 const app = initializeApp(firebaseConfig);
 
-// Inicializa o serviço de autenticação do Firebase
-const auth = getAuth(app);
+// Inicializa o serviço de autenticação do Firebase com persistência AsyncStorage
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
 
 // Inicializa o serviço Firestore para operações no banco de dados
 const db = getFirestore(app);

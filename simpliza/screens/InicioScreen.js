@@ -1,23 +1,57 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../dataBase/firebaseConfig';
 import PrivacyConsentModal from '../components/PrivacyConsentModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function InicioScreen() {
   const navigation = useNavigation();
   const [showConsent, setShowConsent] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Usuário está logado, verificar se deve manter conectado
+        const manterConectado = await AsyncStorage.getItem('manterConectado');
+        if (manterConectado === 'true') {
+          // Verificar se o email foi verificado
+          await user.reload(); // Recarregar dados do usuário
+          if (user.emailVerified) {
+            navigation.replace('Home');
+            return;
+          } else {
+            // Email não verificado, fazer logout e mostrar tela de login
+            await auth.signOut();
+            await AsyncStorage.removeItem('manterConectado');
+          }
+        }
+      }
+      
+      // Verificar consentimento LGPD apenas se não estiver logado
       try {
         const v = await AsyncStorage.getItem('consentimentoLGPD');
         if (v === null) setShowConsent(true);
       } catch (e) {
         setShowConsent(true);
       }
-    })();
-  }, []);
+      
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+        <Text style={{ marginTop: 10, color: '#2f4f4f' }}>Carregando...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
