@@ -1,30 +1,153 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { logoutUser } from '../dataBase/firebaseService';
-import { exportUserData, deleteUserDataAndAccount } from '../dataBase/firebaseService';
+// ...existing code...
+import React, { useCallback, useState } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ScrollView,
+  ActivityIndicator,
+  Platform,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
+// Import das funções do serviço Firebase (logout, exportação, exclusão)
+// Mantê-las centralizadas em um arquivo evita duplicação e facilita testes.
+import { logoutUser, exportUserData, deleteUserDataAndAccount } from '../dataBase/firebaseService';
+
+/**
+ * ConfiguracoesScreen
+ * Tela de configurações do app Simpliza.
+ *
+ * Boas práticas aplicadas:
+ * - Uso de SafeAreaView para respeitar áreas do dispositivo (notch / status bar)
+ * - Separação de constantes (cores, FAQ) no topo para facilitar manutenção e internacionalização
+ * - Handlers com useCallback para evitar recriações desnecessárias
+ * - Tratamento de erros com try/catch e feedback via Alert
+ * - Estados de loading individuais para bloquear ações enquanto operações assíncronas ocorrem
+ * - Pressable com accessibilityRole/testID para melhorar acessibilidade e permitir testes automatizados
+ * - FAQ como array + map para facilitar manutenção do conteúdo
+ */
+
+/* ---------- Constantes reutilizáveis (cores, textos, dados estáticos) ---------- */
+const COLORS = {
+  background: '#e6f4ea',
+  primary: '#065f46',
+  accent: '#047857',
+  card: '#ecfdf5',
+  danger: '#e11d48',
+  info: '#3ab12ff3',
+};
+
+const APP_INFO = {
+  version: '1.0.0',
+  author: 'Grupo Simpliza — TCC 2025',
+};
+
+/* FAQs como array para fácil adição/remoção/edição */
+const FAQS = [
+  {
+    q: 'Como redefinir minha senha?',
+    a: 'Acesse a tela de login e clique em "Esqueci minha senha" para receber instruções no seu e-mail.',
+  },
+  {
+    q: 'Meus dados estão seguros?',
+    a: 'Sim, utilizamos autenticação segura e seus dados são protegidos por criptografia.',
+  },
+  {
+    q: 'Como entrar em contato com o suporte?',
+    a: 'Envie um e-mail para suporte@simpliza.com ou utilize o formulário de contato no app.',
+  },
+  {
+    q: 'Posso usar o app em mais de um dispositivo?',
+    a: 'Sim, basta acessar sua conta em qualquer dispositivo usando seu e-mail e senha cadastrados.',
+  },
+  {
+    q: 'Como editar ou excluir um registro?',
+    a: 'Acesse a tela de histórico, selecione o registro desejado e utilize as opções de editar ou excluir.',
+  },
+  {
+    q: 'O app funciona offline?',
+    a: 'Algumas funcionalidades básicas funcionam offline, mas para salvar ou sincronizar dados é necessário estar conectado à internet.',
+  },
+  {
+    q: 'Como alterar meu e-mail cadastrado?',
+    a: 'Entre em contato com o suporte para solicitar a alteração do e-mail vinculado à sua conta.',
+  },
+  {
+    q: 'O app é gratuito?',
+    a: 'Sim, o Simpliza é totalmente gratuito para todos os usuários.',
+  },
+];
+
+/* ---------- Componente principal da tela de Configurações ---------- */
 export default function ConfiguracoesScreen() {
   const navigation = useNavigation();
-  const handleLogout = async () => {
-    const ok = await logoutUser();
-    if (ok) {
-  navigation.replace('Inicio');
-    } else {
-      Alert.alert('Erro', 'Não foi possível sair da conta.');
+
+  // Estados de loading separados para cada operação assíncrona.
+  // Isso permite exibir indicadores individuais e evitar ações concorrentes.
+  const [loadingLogout, setLoadingLogout] = useState(false);
+  const [loadingExport, setLoadingExport] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
+  /**
+   * handleLogout
+   * Faz logout do usuário chamando a função do serviço.
+   * Usa navigation.replace para limpar histórico de navegação após logout.
+   */
+  const handleLogout = useCallback(async () => {
+    try {
+      setLoadingLogout(true);
+      const ok = await logoutUser(); // função do serviço Firebase
+      if (ok) {
+        // Substitui a pilha de navegação para evitar retorno à telas autenticadas
+        navigation.replace('Inicio');
+      } else {
+        Alert.alert('Erro', 'Não foi possível sair da conta.');
+      }
+    } catch (err) {
+      // Log para debug; em produção considere enviar para Sentry/serviço de logs
+      console.error('Logout error:', err);
+      Alert.alert('Erro', 'Ocorreu um erro ao desconectar. Tente novamente.');
+    } finally {
+      setLoadingLogout(false);
     }
-  };
+  }, [navigation]);
 
-  const handleExport = async () => {
-    const data = await exportUserData();
-    if (!data) return Alert.alert('Erro', 'Não foi possível exportar seus dados.');
-    // Exibe JSON simples para o usuário — em app real, oferecer download ou envio por e-mail.
-    navigation.navigate('Privacy');
-    Alert.alert('Exportação', 'Seus dados foram coletados para exportação. (Ver saída no console)');
-    console.log('Exported user data:', JSON.stringify(data, null, 2));
-  };
+  /**
+   * handleExport
+   * Gera/obtém dados do usuário para exportação.
+   * Exibe feedback e navega para uma tela de privacidade/termos se necessário.
+   */
+  const handleExport = useCallback(async () => {
+    try {
+      setLoadingExport(true);
+      const data = await exportUserData(); // função do serviço que retorna dados do usuário
+      if (!data) {
+        Alert.alert('Erro', 'Não foi possível exportar seus dados.');
+        return;
+      }
+      // Em produção: oferecer compartilhamento (Share API) ou download
+      console.log('Exported user data:', JSON.stringify(data, null, 2));
+      Alert.alert('Exportação', 'Seus dados foram preparados para exportação.');
+      // Exemplo: navegar para tela onde o usuário pode baixar/visualizar termos
+      navigation.navigate('Privacy');
+    } catch (err) {
+      console.error('Export error:', err);
+      Alert.alert('Erro', 'Falha ao exportar dados. Tente novamente mais tarde.');
+    } finally {
+      setLoadingExport(false);
+    }
+  }, [navigation]);
 
-  const handleDelete = async () => {
+  /**
+   * handleDelete
+   * Exibe confirmação antes de excluir dados + conta do usuário.
+   * Operação destrutiva: usar Alert com botão "destructive" em iOS/Android.
+   */
+  const handleDelete = useCallback(() => {
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir todos os seus dados e a conta? Esta ação é irreversível.',
@@ -34,116 +157,134 @@ export default function ConfiguracoesScreen() {
           text: 'Confirmar',
           style: 'destructive',
           onPress: async () => {
-            const ok = await deleteUserDataAndAccount();
-            if (ok) {
-              Alert.alert('Pronto', 'Sua conta e dados foram excluídos.');
-              navigation.replace('Inicio');
-            } else {
-              Alert.alert('Erro', 'Não foi possível excluir sua conta agora.');
+            try {
+              setLoadingDelete(true);
+              const ok = await deleteUserDataAndAccount(); // função do serviço
+              if (ok) {
+                Alert.alert('Pronto', 'Sua conta e dados foram excluídos.');
+                navigation.replace('Inicio');
+              } else {
+                Alert.alert('Erro', 'Não foi possível excluir sua conta agora.');
+              }
+            } catch (err) {
+              console.error('Delete account error:', err);
+              Alert.alert('Erro', 'Falha ao excluir conta. Tente novamente mais tarde.');
+            } finally {
+              setLoadingDelete(false);
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
+      { cancelable: true }
     );
-  };
+  }, [navigation]);
 
+  /* ---------- Render da interface ---------- */
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Configurações</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+      {/* ScrollView para garantir rolagem em telas pequenas */}
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.container}>
+          {/* Título principal da tela */}
+          <Text style={styles.title}>Configurações</Text>
 
-        <View style={styles.card}>
-          <View style={styles.itemRow}>
-            <Text style={styles.label}>Tema:</Text>
-            <Text style={styles.value}>Modo claro (padrão)</Text>
+          {/* Card com informações básicas do aplicativo */}
+          <View style={styles.card}>
+            <View style={styles.itemRow}>
+              <Text style={styles.label}>Tema:</Text>
+              <Text style={styles.value}>Modo claro (padrão)</Text>
+            </View>
+
+            <View style={styles.itemRow}>
+              <Text style={styles.label}>Versão do app:</Text>
+              <Text style={styles.value}>{APP_INFO.version}</Text>
+            </View>
+
+            <View style={styles.itemRow}>
+              <Text style={styles.label}>Desenvolvido por:</Text>
+              <Text style={styles.value}>{APP_INFO.author}</Text>
+            </View>
           </View>
-          <View style={styles.itemRow}>
-            <Text style={styles.label}>Versão do app:</Text>
-            <Text style={styles.value}>1.0.0</Text>
+
+          {/* Seção FAQ gerada dinamicamente a partir do array FAQS */}
+          <View style={styles.saqContainer}>
+            <Text style={styles.saqTitle}>Perguntas Frequentes (FAQ)</Text>
+            {FAQS.map((item, idx) => (
+              <View key={idx} style={styles.saqItem}>
+                <Text style={styles.saqQuestion}>• {item.q}</Text>
+                <Text style={styles.saqAnswer}>{item.a}</Text>
+              </View>
+            ))}
           </View>
-          <View style={styles.itemRow}>
-            <Text style={styles.label}>Desenvolvido por:</Text>
-            <Text style={styles.value}>Grupo Simpliza — TCC 2025</Text>
+
+          {/* Botões de ação principais: Logout, Exportar, Deletar */}
+          <View style={styles.actions}>
+            <Pressable
+              style={[styles.actionButton, { backgroundColor: COLORS.primary }]}
+              onPress={handleLogout}
+              disabled={loadingLogout || loadingExport || loadingDelete}
+              accessibilityRole="button"
+              testID="logoutButton"
+            >
+              {loadingLogout ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>Sair</Text>}
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, { backgroundColor: COLORS.info, marginTop: 12 }]}
+              onPress={handleExport}
+              disabled={loadingExport || loadingLogout || loadingDelete}
+              accessibilityRole="button"
+              testID="exportButton"
+            >
+              {loadingExport ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>Ler termos de uso de dados</Text>}
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, { backgroundColor: COLORS.danger, marginTop: 12 }]}
+              onPress={handleDelete}
+              disabled={loadingDelete || loadingLogout || loadingExport}
+              accessibilityRole="button"
+              testID="deleteButton"
+            >
+              {loadingDelete ? <ActivityIndicator color="#fff" /> : (
+                <Text style={styles.actionText}>Solicitar exclusão de dados e conta</Text>
+              )}
+            </Pressable>
           </View>
         </View>
-
-        {/* SAQ - Seção de Ajuda e Questões Frequentes */}
-        <View style={styles.saqContainer}>
-          <Text style={styles.saqTitle}>Perguntas Frequentes (FAQ)</Text>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• Como redefinir minha senha?</Text>
-            <Text style={styles.saqAnswer}>Acesse a tela de login e clique em "Esqueci minha senha" para receber instruções no seu e-mail.</Text>
-          </View>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• Meus dados estão seguros?</Text>
-            <Text style={styles.saqAnswer}>Sim, utilizamos autenticação segura e seus dados são protegidos por criptografia.</Text>
-          </View>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• Como entrar em contato com o suporte?</Text>
-            <Text style={styles.saqAnswer}>Envie um e-mail para suporte@simpliza.com ou utilize o formulário de contato no app.</Text>
-          </View>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• Posso usar o app em mais de um dispositivo?</Text>
-            <Text style={styles.saqAnswer}>Sim, basta acessar sua conta em qualquer dispositivo usando seu e-mail e senha cadastrados.</Text>
-          </View>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• Como editar ou excluir um registro?</Text>
-            <Text style={styles.saqAnswer}>Acesse a tela de histórico, selecione o registro desejado e utilize as opções de editar ou excluir.</Text>
-          </View>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• O app funciona offline?</Text>
-            <Text style={styles.saqAnswer}>Algumas funcionalidades básicas funcionam offline, mas para salvar ou sincronizar dados é necessário estar conectado à internet.</Text>
-          </View>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• Como alterar meu e-mail cadastrado?</Text>
-            <Text style={styles.saqAnswer}>Entre em contato com o suporte para solicitar a alteração do e-mail vinculado à sua conta.</Text>
-          </View>
-          <View style={styles.saqItem}>
-            <Text style={styles.saqQuestion}>• O app é gratuito?</Text>
-            <Text style={styles.saqAnswer}>Sim, o Simpliza é totalmente gratuito para todos os usuários.</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.85}>
-          <Text style={styles.logoutText}>Sair</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: '#3ab12ff3', marginTop: 12 }]} onPress={handleExport} activeOpacity={0.85}>
-          <Text style={styles.logoutText}>Ler termos de uso de dados</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: '#e11d48', marginTop: 12 }]} onPress={handleDelete} activeOpacity={0.85}>
-          <Text style={styles.logoutText}>Solicitar exclusão de dados e conta</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
+/* ---------- Estilos organizados e comentados ---------- */
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#e6f4ea',
+    backgroundColor: COLORS.background,
     paddingBottom: 30,
   },
   container: {
     flex: 1,
-    backgroundColor: '#e6f4ea',
+    backgroundColor: COLORS.background,
     paddingHorizontal: 20,
-    paddingTop: 60,
+    // Ajuste de padding superior baseado na plataforma para evitar sobreposição com a status bar
+    paddingTop: Platform.OS === 'android' ? 20 : 40,
     justifyContent: 'flex-start',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#065f46',
+    color: COLORS.primary,
     marginBottom: 30,
     textAlign: 'center',
     letterSpacing: 1,
   },
   card: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 24,
-    marginBottom: 40,
+    marginBottom: 24,
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.08,
@@ -160,31 +301,34 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: 'bold',
-    color: '#047857',
+    color: COLORS.accent,
     fontSize: 16,
   },
   value: {
     fontSize: 16,
-    color: '#065f46',
+    color: COLORS.primary,
     textAlign: 'right',
-    flexShrink: 1,
+    flexShrink: 1, // evita overflow de texto longo
   },
-  logoutButton: {
-    marginTop: 'auto',
+  actions: {
+    marginTop: 8,
     marginBottom: 30,
-    alignSelf: 'center',
+  },
+  actionButton: {
+    alignSelf: 'stretch',
     width: '100%',
-    backgroundColor: '#065f46',
     paddingVertical: 16,
     borderRadius: 12,
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.12,
     shadowOffset: { width: 0, height: 2 },
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  logoutText: {
+  actionText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
     letterSpacing: 1,
@@ -193,7 +337,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 14,
     padding: 20,
-    marginBottom: 30,
+    marginBottom: 20,
     elevation: 1,
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -202,7 +346,7 @@ const styles = StyleSheet.create({
   saqTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#047857',
+    color: COLORS.accent,
     marginBottom: 12,
     textAlign: 'left',
   },
@@ -211,12 +355,12 @@ const styles = StyleSheet.create({
   },
   saqQuestion: {
     fontWeight: 'bold',
-    color: '#065f46',
+    color: COLORS.primary,
     fontSize: 15,
     marginBottom: 2,
   },
   saqAnswer: {
-    color: '#047857',
+    color: COLORS.accent,
     fontSize: 14,
     marginLeft: 8,
     marginBottom: 2,

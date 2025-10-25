@@ -188,37 +188,3 @@ export async function atualizarStatusVerificacaoEmail() {
   }
 }
 
-// Função para reenviar email de verificação com controle de rate limiting
-export async function reenviarEmailVerificacao() {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error('Usuário não está logado');
-    }
-
-    if (user.emailVerified) {
-      throw new Error('Email já foi verificado');
-    }
-
-    // Configurações personalizadas para o email
-    const actionCodeSettings = {
-      url: `https://simpliza-33e9a.firebaseapp.com/?email=${encodeURIComponent(user.email)}`,
-      handleCodeInApp: false,
-    };
-
-    // Importar sendEmailVerification aqui para evitar problemas de importação circular
-    const { sendEmailVerification } = await import('firebase/auth');
-    await sendEmailVerification(user, actionCodeSettings);
-
-    // Atualizar timestamp do último email enviado
-    const userDocRef = doc(db, 'usuarios', user.uid);
-    await updateDoc(userDocRef, {
-      ultimoEmailEnviado: new Date().toISOString()
-    });
-
-    return true;
-  } catch (error) {
-    console.error('Erro ao reenviar email:', error);
-    throw error;
-  }
-}
