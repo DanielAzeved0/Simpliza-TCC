@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, BackHandler, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../dataBase/firebaseConfig';
@@ -10,6 +10,20 @@ export default function InicioScreen() {
   const navigation = useNavigation();
   const [showConsent, setShowConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Bloquear botão de voltar para sair do app
+  useEffect(() => {
+    const backAction = () => {
+      // Sai do app ao pressionar voltar na tela de início
+      if (Platform.OS === 'android') {
+        BackHandler.exitApp();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {

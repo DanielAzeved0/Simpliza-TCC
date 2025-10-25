@@ -59,14 +59,33 @@ export default function PrivacyScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Política de Privacidade</Text>
-        <Text style={styles.text}>{PRIVACY_TEXT}</Text>
+  {/* Título acessível para leitores de tela */}
+  <Text style={[styles.title, { marginTop: 32, marginBottom: 32 }]} accessibilityRole="header" accessibilityLabel="Política de Privacidade">Política de Privacidade</Text>
+    <Text style={[styles.text, { marginBottom: 32 }]}>{PRIVACY_TEXT}</Text>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.buttonDecline} onPress={decline}>
+          <TouchableOpacity
+            style={styles.buttonDecline}
+            onPress={decline}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Recusar política de privacidade"
+            accessibilityHint="Recusa o consentimento e retorna para a tela anterior"
+            testID="botao-recusar-privacidade"
+          >
             <Text style={styles.buttonDeclineText}>Recusar</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonAccept} onPress={accept}>
+          <TouchableOpacity
+            style={styles.buttonAccept}
+            onPress={accept}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Aceitar política de privacidade"
+            accessibilityHint="Aceita o consentimento e retorna para a tela anterior"
+            testID="botao-aceitar-privacidade"
+          >
             <Text style={styles.buttonAcceptText}>Aceitar</Text>
           </TouchableOpacity>
         </View>

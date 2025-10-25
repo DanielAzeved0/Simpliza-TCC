@@ -1,6 +1,6 @@
 // CriarContaScreen.js
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, BackHandler } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../dataBase/firebaseConfig';
@@ -10,6 +10,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function CriarContaScreen({ navigation }) {
+    useEffect(() => {
+        const backAction = () => {
+            navigation.replace('Inicio');
+            return true;
+        };
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+        return () => backHandler.remove();
+    }, [navigation]);
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');

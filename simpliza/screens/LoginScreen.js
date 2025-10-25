@@ -1,6 +1,6 @@
 // LoginScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Checkbox, Provider as PaperProvider } from 'react-native-paper';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -9,10 +9,20 @@ import { auth } from '../dataBase/firebaseConfig';
 import useGoogleAuth from '../dataBase/googleAuth';
 
 export default function LoginScreen({ navigation }) {
+    useEffect(() => {
+        const backAction = () => {
+            navigation.replace('Inicio');
+            return true;
+        };
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+        return () => backHandler.remove();
+    }, [navigation]);
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [manterConectado, setManterConectado] = useState(false);
+    const emailRef = React.useRef(null);
+    const senhaRef = React.useRef(null);
 
     const { promptAsync, request } = useGoogleAuth(navigation);
         const [consentido, setConsentido] = useState(false);
@@ -50,23 +60,31 @@ export default function LoginScreen({ navigation }) {
     return (
         <PaperProvider>
             <View style={styles.container}>
-                <Text style={styles.title}>LOGIN</Text>
-
+                {/* Título acessível para leitores de tela */}
+                <Text style={styles.title} accessibilityRole="header" accessibilityLabel="Tela de login">LOGIN</Text>
 
                 <Text style={styles.label}>E-MAIL</Text>
-                <TextInput 
-                    style={styles.input} 
-                    placeholder="Digite seu e-mail" 
-                    value={email} 
-                    onChangeText={setEmail} 
-                    autoCapitalize="none" 
+                <TextInput
+                    ref={emailRef}
+                    style={styles.input}
+                    placeholder="Digite seu e-mail"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
                     placeholderTextColor="#888888"
                     keyboardType="email-address"
                     autoComplete="email"
+                    returnKeyType="next"
+                    onSubmitEditing={() => senhaRef.current && senhaRef.current.focus()}
+                    blurOnSubmit={false}
+                    accessibilityLabel="Campo de e-mail"
+                    accessibilityHint="Digite seu e-mail"
+                    testID="input-email"
                 />
                 <Text style={styles.label}>SENHA</Text>
                 <View style={styles.passwordContainer}>
                     <TextInput
+                        ref={senhaRef}
                         style={styles.inputSenha}
                         placeholder="Digite sua senha"
                         secureTextEntry={!mostrarSenha}
@@ -74,8 +92,21 @@ export default function LoginScreen({ navigation }) {
                         onChangeText={setSenha}
                         placeholderTextColor="#888888"
                         autoComplete="password"
+                        returnKeyType="done"
+                        onSubmitEditing={login}
+                        accessibilityLabel="Campo de senha"
+                        accessibilityHint="Digite sua senha"
+                        testID="input-senha"
                     />
-                    <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+                    <TouchableOpacity
+                        onPress={() => setMostrarSenha(!mostrarSenha)}
+                        activeOpacity={0.6}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        accessibilityRole="button"
+                        accessibilityLabel={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                        accessibilityHint="Alterna a visibilidade da senha"
+                        testID="botao-olho-senha"
+                    >
                         <Ionicons name={mostrarSenha ? 'eye-outline' : 'eye-off-outline'} size={24} color="gray" />
                     </TouchableOpacity>
                 </View>
@@ -85,15 +116,25 @@ export default function LoginScreen({ navigation }) {
                         status={manterConectado ? 'checked' : 'unchecked'}
                         onPress={() => setManterConectado(!manterConectado)}
                         color="#4CAF50"
+                        accessibilityLabel="Manter-se conectado"
+                        accessibilityHint="Mantenha-se conectado ao app"
+                        testID="checkbox-manter-conectado"
                     />
                     <Text style={styles.checkboxLabel}>Manter-se conectado</Text>
                 </View>
 
-
-                <TouchableOpacity style={styles.button} onPress={login}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={login}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Concluir Login"
+                    accessibilityHint="Fazer login com e-mail e senha"
+                    testID="botao-login"
+                >
                     <Text style={styles.buttonText}>Concluir Login</Text>
                 </TouchableOpacity>
-
 
                 <TouchableOpacity
                     style={styles.googleButton}
@@ -102,6 +143,12 @@ export default function LoginScreen({ navigation }) {
                         promptAsync();
                     }}
                     disabled={!request}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Conectar com o Google"
+                    accessibilityHint="Fazer login usando sua conta Google"
+                    testID="botao-google"
                 >
                     <Text style={styles.googleText}>Conectar com o Google</Text>
                 </TouchableOpacity>
@@ -109,6 +156,12 @@ export default function LoginScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.cadastroButton}
                     onPress={() => navigation.navigate('CriarConta')}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Ir para cadastro"
+                    accessibilityHint="Ir para tela de criar conta"
+                    testID="botao-cadastro"
                 >
                     <Text style={styles.cadastroText}>Não tem conta? Cadastre-se</Text>
                 </TouchableOpacity>

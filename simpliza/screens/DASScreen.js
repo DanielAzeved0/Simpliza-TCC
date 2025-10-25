@@ -149,7 +149,6 @@ export default function DASScreen({ navigation }) {
           <Pressable style={styles.modalOverlay} onPress={() => setAjudaVisible(false)}>
             <Pressable
               style={[styles.modalContent, { width: Math.min(windowWidth * 0.9, 480) }]}
-              accessibilityRole="dialog"
               accessibilityLabel="Ajuda sobre o DAS"
               onPress={() => {}}
             >

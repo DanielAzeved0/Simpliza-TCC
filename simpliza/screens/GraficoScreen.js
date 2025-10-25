@@ -1,65 +1,82 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
-import { Modal } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Pressable, useWindowDimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
 import { getHistorico } from '../dataBase/firebaseService';
 import NavBar from '../components/navBar';
-
-const screenWidth = Dimensions.get('window').width;
 const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe', '#dfe6e9'];
 
 export default function GraficoScreen({ navigation }) {
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ajudaVisible, setAjudaVisible] = useState(false);
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
     async function carregar() {
+      setLoading(true);
       try {
         const dados = await getHistorico();
-        setHistorico(dados);
+        setHistorico(Array.isArray(dados) ? dados : []);
       } catch (e) {
         setHistorico([]);
+      } finally {
+        setLoading(false);
       }
     }
     carregar();
   }, []);
 
-
-  const ganhos = historico.filter(i => i.tipo === 'ganho');
-  const gastos = historico.filter(i => i.tipo === 'gasto');
-  const parseValor = v => {
+  const parseValor = (v) => {
     if (typeof v === 'string') v = v.replace(',', '.');
     const n = Number(v);
     return isNaN(n) ? 0 : n;
   };
-  const soma = arr => arr.reduce((acc, cur) => acc + parseValor(cur.valor), 0);
 
-  const barChartData = {
-    labels: ['Ganhos', 'Gastos'],
-    datasets: [
-      {
-        data: [soma(ganhos), soma(gastos)]
+  const formatBRL = (n) => `R$ ${Number(n || 0).toFixed(2).replace('.', ',')}`;
+
+  const { ganhos, gastos, somaGanhos, somaGastos, barChartData, pieData, ganhosPorMes, gastosPorMes } = useMemo(() => {
+    const g = historico.filter(i => i.tipo === 'ganho');
+    const ga = historico.filter(i => i.tipo === 'gasto');
+    const somaArr = (arr) => arr.reduce((acc, cur) => acc + parseValor(cur.valor), 0);
+    const sG = somaArr(g);
+    const sGa = somaArr(ga);
+
+    const categorias = {};
+    ga.forEach(item => {
+      const key = item.categoria;
+      categorias[key] = (categorias[key] || 0) + parseValor(item.valor);
+    });
+    const pData = Object.entries(categorias).map(([key, value], index) => ({
+      name: key === 'mercado' ? 'comida' : key,
+      population: value,
+      color: cores[index % cores.length],
+      legendFontColor: '#7F7F7F',
+      legendFontSize: 15,
+      categoria: key === 'mercado' ? 'comida' : key,
+      valor: value
+    }));
+
+    const gm = Array(12).fill(0);
+    const gtm = Array(12).fill(0);
+    historico.forEach(item => {
+      const data = item.data ? new Date(item.data) : null;
+      if (data && data.getMonth) {
+        const mes = data.getMonth();
+        if (item.tipo === 'ganho') gm[mes] += parseValor(item.valor);
+        if (item.tipo === 'gasto') gtm[mes] += parseValor(item.valor);
       }
-    ]
-  };
+    });
 
-  const categorias = {};
-  gastos.forEach(item => {
-    categorias[item.categoria] = (categorias[item.categoria] || 0) + parseValor(item.valor);
-  });
+    const bData = {
+      labels: ['Ganhos', 'Gastos'],
+      datasets: [
+        { data: [sG, sGa] }
+      ]
+    };
 
-  const pieData = Object.entries(categorias).map(([key, value], index) => ({
-    name: key === 'mercado' ? 'comida' : key,
-    population: value,
-    color: cores[index % cores.length],
-    legendFontColor: '#7F7F7F',
-    legendFontSize: 15,
-    categoria: key === 'mercado' ? 'comida' : key,
-    valor: value
-  }));
+    return { ganhos: g, gastos: ga, somaGanhos: sG, somaGastos: sGa, barChartData: bData, pieData: pData, ganhosPorMes: gm, gastosPorMes: gtm };
+  }, [historico]);
 
   const chartConfig = {
     backgroundColor: '#e6f4ea',
@@ -73,19 +90,8 @@ export default function GraficoScreen({ navigation }) {
     }
   };
 
-  // Dados para o gráfico de linhas
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  const ganhosPorMes = Array(12).fill(0);
-  const gastosPorMes = Array(12).fill(0);
-  historico.forEach(item => {
-    const data = item.data ? new Date(item.data) : null;
-    if (data && data.getMonth) {
-      const mes = data.getMonth();
-      if (item.tipo === 'ganho') ganhosPorMes[mes] += parseValor(item.valor);
-      if (item.tipo === 'gasto') gastosPorMes[mes] += parseValor(item.valor);
-    }
-  });
-  const lineChartData = {
+  const lineChartData = useMemo(() => ({
     labels: meses,
     datasets: [
       {
@@ -100,7 +106,7 @@ export default function GraficoScreen({ navigation }) {
       },
     ],
     legend: ['Ganhos', 'Gastos'],
-  };
+  }), [ganhosPorMes, gastosPorMes]);
 
   const handleNavBarPress = (screen) => {
     if (screen === 'Inicio') navigation.navigate('Home');
@@ -114,13 +120,21 @@ export default function GraficoScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#065f46', paddingTop: 60 }}>Gráficos</Text>
-          <TouchableOpacity onPress={() => setAjudaVisible(true)}>
-            <Ionicons name="help-circle-outline" size={28} color="#065f46" paddingTop="65"/>
-          </TouchableOpacity>
+        <View style={styles.headerRow}>
+          <Text accessibilityRole="header" style={styles.titleText}>Gráficos</Text>
+          <Pressable
+            onPress={() => setAjudaVisible(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir ajuda sobre os gráficos"
+            accessibilityHint="Mostra explicações sobre como ler os gráficos"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: true }}
+            testID="botao-ajuda-graficos"
+          >
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+          </Pressable>
         </View>
 
         <Modal
@@ -129,15 +143,21 @@ export default function GraficoScreen({ navigation }) {
           animationType="fade"
           onRequestClose={() => setAjudaVisible(false)}
         >
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '90%' }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Sobre os Gráficos</Text>
-              <Text style={{ marginBottom: 20 }}>
+          <View style={styles.modalOverlay}>
+            <Pressable style={styles.modalBackdrop} onPress={() => setAjudaVisible(false)} />
+            <View style={[styles.modalCard, { width: Math.min(width * 0.9, 480) }]} accessibilityLabel="Ajuda sobre os gráficos">
+              <Text style={styles.modalTitle}>Sobre os Gráficos</Text>
+              <Text style={styles.modalBody}>
                 Aqui você visualiza gráficos dos seus ganhos e gastos. Use para acompanhar sua evolução financeira e identificar padrões.
               </Text>
-              <TouchableOpacity style={{ alignSelf: 'center', backgroundColor: '#065f46', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8 }} onPress={() => setAjudaVisible(false)}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Fechar</Text>
-              </TouchableOpacity>
+              <Pressable
+                style={styles.modalButton}
+                onPress={() => setAjudaVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar ajuda"
+              >
+                <Text style={styles.modalButtonText}>Fechar</Text>
+              </Pressable>
             </View>
           </View>
         </Modal>
@@ -145,25 +165,31 @@ export default function GraficoScreen({ navigation }) {
         {/* Gráfico de Pizza */}
         <View style={{ marginBottom: 32 }}>
           <Text style={styles.subtitulo}>Maiores Gastos do Mês</Text>
-          <PieChart
-            data={pieData}
-            width={screenWidth - 40}
-            height={240}
-            chartConfig={chartConfig}
-            accessor={'population'}
-            backgroundColor={'transparent'}
-            paddingLeft={'15'}
-            absolute
-            style={styles.chart}
-          />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
-            {pieData.map((item, idx) => (
-              <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12, marginBottom: 4 }}>
-                <View style={{ width: 12, height: 12, backgroundColor: item.color, marginRight: 4, borderRadius: 2 }} />
-                <Text style={{ fontSize: 13 }}>{item.categoria}: R$ {item.valor.toFixed(0)}</Text>
+          {pieData.length > 0 ? (
+            <>
+              <PieChart
+                data={pieData}
+                width={width - 40}
+                height={240}
+                chartConfig={chartConfig}
+                accessor={'population'}
+                backgroundColor={'transparent'}
+                paddingLeft={'15'}
+                absolute
+                style={styles.chart}
+              />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
+                {pieData.map((item, idx) => (
+                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12, marginBottom: 4 }}>
+                    <View style={{ width: 12, height: 12, backgroundColor: item.color, marginRight: 4, borderRadius: 2 }} />
+                    <Text style={{ fontSize: 13 }}>{item.categoria}: {formatBRL(item.valor)}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
+            </>
+          ) : (
+            <Text style={styles.emptyText}>Sem dados de gastos por categoria.</Text>
+          )}
         </View>
 
         {/* Gráfico de Barras */}
@@ -172,19 +198,22 @@ export default function GraficoScreen({ navigation }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <BarChart
               data={barChartData}
-              width={Math.max(screenWidth, 80 * barChartData.labels.length)}
+              width={Math.max(width, 80 * barChartData.labels.length)}
               height={240}
               chartConfig={{
                 ...chartConfig,
-                formatTopLabelValue: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`
+                formatTopLabelValue: (value) => formatBRL(value)
               }}
               verticalLabelRotation={0}
               showValuesOnTopOfBars={true}
-              style={[styles.chart, { minWidth: screenWidth - 40 }]}
+              style={[styles.chart, { minWidth: width - 40 }]}
               fromZero
               segments={5}
             />
           </ScrollView>
+          {(somaGanhos === 0 && somaGastos === 0) && (
+            <Text style={styles.emptyText}>Sem dados de ganhos e gastos para comparar.</Text>
+          )}
         </View>
 
         {/* Gráfico de Linhas */}
@@ -193,17 +222,22 @@ export default function GraficoScreen({ navigation }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <LineChart
               data={lineChartData}
-              width={Math.max(screenWidth, 60 * lineChartData.labels.length)}
+              width={Math.max(width, 60 * lineChartData.labels.length)}
               height={240}
               chartConfig={chartConfig}
               bezier
-              style={[styles.chart, { minWidth: screenWidth - 40 }]}
+              style={[styles.chart, { minWidth: width - 40 }]}
               withVerticalLines={true}
               withHorizontalLines={true}
               fromZero
               segments={5}
             />
           </ScrollView>
+          {(
+            ganhosPorMes.every(v => v === 0) && gastosPorMes.every(v => v === 0)
+          ) && (
+            <Text style={styles.emptyText}>Sem dados mensais para exibir.</Text>
+          )}
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 8 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 16 }}>
               <View style={{ width: 12, height: 12, backgroundColor: '#10b981', marginRight: 4, borderRadius: 2 }} />
@@ -215,8 +249,8 @@ export default function GraficoScreen({ navigation }) {
             </View>
           </View>
         </View>
-        
-        {loading && <ActivityIndicator size="large" color="#000" />}
+
+        {loading && <ActivityIndicator style={{ marginTop: 8 }} size="large" color="#000" />}
       </ScrollView>
       <NavBar onPress={handleNavBarPress} />
     </View>
@@ -228,6 +262,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e6f4ea',
     padding: 20,
+  },
+  content: {
+    paddingBottom: 24,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    paddingTop: 60,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    fontSize: 28,
+    color: '#065f46',
   },
   title: {
     fontSize: 28,
@@ -247,4 +296,27 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 16,
   },
+  emptyText: {
+    textAlign: 'center',
+    color: '#555',
+    marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalTitle: { fontWeight: 'bold', fontSize: 18, marginBottom: 12 },
+  modalBody: { marginBottom: 20 },
+  modalButton: { alignSelf: 'center', backgroundColor: '#065f46', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8 },
+  modalButtonText: { color: '#fff', fontWeight: 'bold' },
 });

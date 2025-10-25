@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,27 +37,49 @@ export default function HistoricoScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [registroSelecionado, setRegistroSelecionado] = useState(null);
   const [tituloEdit, setTituloEdit] = useState('');
+  const [descricaoEdit, setDescricaoEdit] = useState('');
   const [valorEdit, setValorEdit] = useState('');
   const [categoriaEdit, setCategoriaEdit] = useState('');
+  const [erroTituloEdit, setErroTituloEdit] = useState('');
+  const [erroValorEdit, setErroValorEdit] = useState('');
+  const tituloEditRef = useRef(null);
+  const valorEditRef = useRef(null);
 
   const abrirModalEdicao = (item) => {
     setRegistroSelecionado(item);
     setTituloEdit(item.titulo);
+    setDescricaoEdit(item.descricao || '');
     setValorEdit(item.valor.toString());
     setCategoriaEdit(item.categoria);
+    setErroTituloEdit('');
+    setErroValorEdit('');
     setModalVisible(true);
+    setTimeout(() => {
+      if (item.categoria === 'outros' && tituloEditRef.current) {
+        tituloEditRef.current.focus();
+      } else if (valorEditRef.current) {
+        valorEditRef.current.focus();
+      }
+    }, 300);
   };
 
   const salvarEdicao = async () => {
     if (!registroSelecionado) return;
-
+    if (categoriaEdit === 'outros' && !tituloEdit.trim()) {
+      setErroTituloEdit('Título obrigatório');
+      return;
+    }
+    if (!valorEdit.trim() || isNaN(Number(valorEdit.replace(',', '.')))) {
+      setErroValorEdit('Valor inválido');
+      return;
+    }
     await updateTransacao(registroSelecionado.id, {
       ...registroSelecionado,
       titulo: tituloEdit,
-      valor: parseFloat(valorEdit),
+      descricao: registroSelecionado?.tipo === 'ganho' ? descricaoEdit : registroSelecionado.descricao,
+      valor: parseFloat(valorEdit.replace(',', '.')),
       categoria: categoriaEdit
     });
-
     setModalVisible(false);
     carregarTransacoes();
   };
@@ -241,6 +263,7 @@ export default function HistoricoScreen({ navigation }) {
             }>
               <Text style={styles.modalTitle}>Editar Transação</Text>
 
+
               {registroSelecionado?.tipo === 'gasto' && (
                 <Dropdown
                   style={styles.modalInputFull}
@@ -255,20 +278,56 @@ export default function HistoricoScreen({ navigation }) {
                 />
               )}
 
-              <TextInput
-                style={styles.modalInputFull}
-                value={tituloEdit}
-                onChangeText={setTituloEdit}
-                placeholder="Título"
-              />
+              {categoriaEdit === 'outros' || registroSelecionado?.tipo === 'ganho' ? (
+                <>
+                  <TextInput
+                    ref={tituloEditRef}
+                    style={styles.modalInputFull}
+                    value={tituloEdit}
+                    onChangeText={text => {
+                      setTituloEdit(text);
+                      setErroTituloEdit(text.trim() ? '' : 'Título obrigatório');
+                    }}
+                    placeholder="Título"
+                    returnKeyType="next"
+                    onSubmitEditing={() => valorEditRef.current && valorEditRef.current.focus()}
+                    blurOnSubmit={false}
+                    accessibilityLabel="Campo de título"
+                    accessibilityHint="Digite o título do registro"
+                    testID="input-titulo-edit"
+                  />
+                  {!!erroTituloEdit && (
+                    <Text style={{ color: 'red', marginBottom: 4 }}>{erroTituloEdit}</Text>
+                  )}
+                </>
+              ) : null}
+
 
               <TextInput
+                ref={valorEditRef}
                 style={styles.modalInputFull}
                 value={valorEdit}
-                onChangeText={setValorEdit}
+                onChangeText={text => {
+                  const sanitized = text.replace(/[^0-9,]/g, '');
+                  setValorEdit(sanitized);
+                  if (!sanitized.trim() || isNaN(Number(sanitized.replace(',', '.')))) {
+                    setErroValorEdit('Valor inválido');
+                  } else {
+                    setErroValorEdit('');
+                  }
+                }}
                 placeholder="Valor"
-                keyboardType="numeric"
+                inputMode="decimal"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
+                onSubmitEditing={salvarEdicao}
+                accessibilityLabel="Campo de valor"
+                accessibilityHint="Digite o valor do registro, apenas números"
+                testID="input-valor-edit"
               />
+              {!!erroValorEdit && (
+                <Text style={{ color: 'red', marginBottom: 4 }}>{erroValorEdit}</Text>
+              )}
 
               <View style={styles.modalButtonsRow}>
                 <TouchableOpacity
@@ -277,6 +336,9 @@ export default function HistoricoScreen({ navigation }) {
                     registroSelecionado?.tipo === 'gasto' ? styles.cancelButtonRed : styles.cancelButton
                   ]}
                   onPress={() => setModalVisible(false)}
+                  accessibilityLabel="Cancelar edição"
+                  accessibilityHint="Fecha o modal de edição"
+                  testID="botao-cancelar-edicao"
                 >
                   <Text style={
                     registroSelecionado?.tipo === 'gasto' ? styles.cancelButtonTextRed : styles.cancelButtonText
@@ -285,9 +347,17 @@ export default function HistoricoScreen({ navigation }) {
                 <TouchableOpacity
                   style={[
                     styles.modalButton,
-                    registroSelecionado?.tipo === 'gasto' ? styles.saveButtonRed : styles.saveButton
+                    registroSelecionado?.tipo === 'gasto' ? styles.saveButtonRed : styles.saveButton,
+                    ((categoriaEdit === 'outros' && (!tituloEdit.trim() || !!erroTituloEdit)) || !valorEdit.trim() || !!erroValorEdit) && { opacity: 0.5 }
                   ]}
                   onPress={salvarEdicao}
+                  disabled={
+                    (categoriaEdit === 'outros' && (!tituloEdit.trim() || !!erroTituloEdit)) ||
+                    !valorEdit.trim() || !!erroValorEdit
+                  }
+                  accessibilityLabel="Salvar edição"
+                  accessibilityHint="Salva as alterações do registro"
+                  testID="botao-salvar-edicao"
                 >
                   <Text style={
                     registroSelecionado?.tipo === 'gasto' ? styles.saveButtonTextRed : styles.saveButtonText

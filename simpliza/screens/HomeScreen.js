@@ -18,55 +18,84 @@ export default function HomeScreen({ navigation }) {
   const ICON_SIZE = 32;
   return (
     <View style={styles.container}>
+      {/* Título acessível para leitores de tela */}
+      <Text accessibilityRole="header" accessibilityLabel="Tela inicial" style={{ position: 'absolute', top: 60, left: 0, width: '100%', textAlign: 'center', opacity: 0 }}>
+        Home
+      </Text>
 
       {/* Botão grande (Acessar/Novo Registro) */}
-  <View style={{width: CARD_SIZE * 2 + CARD_MARGIN, alignSelf: 'center', marginBottom: 12}}>
+      <View style={{width: CARD_SIZE * 2 + CARD_MARGIN, alignSelf: 'center', marginBottom: 12}}>
         <TouchableOpacity
           style={[styles.cardFull, { height: CARD_HEIGHT * 1.2, width: '100%' }]}
           onPress={() => navigation.navigate('NovoRegistro')}
+          activeOpacity={0.7}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityLabel="Novo Registro"
+          accessibilityHint="Ir para tela de novo registro"
+          testID="botao-novo-registro"
         >
-              <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                <AntDesign name="pluscircleo" size={ICON_SIZE + 8} color="#065f46" />
-                <Text style={[styles.cardText, { fontSize: 18, marginTop: 12 }]}>Novo Registro</Text>
-              </View>
+          <View style={{alignItems: 'center', justifyContent: 'center'}}>
+            <AntDesign name="pluscircleo" size={ICON_SIZE + 8} color="#065f46" />
+            <Text style={[styles.cardText, { fontSize: 18, marginTop: 12 }]}>Novo Registro</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* Grid 2 colunas, 3 linhas */}
+      {/* Grid 2 colunas, 2 linhas */}
       <View style={styles.gridContainer}>
         <View style={styles.gridRow}>
           <TouchableOpacity
             style={[styles.card, { width: CARD_SIZE, height: CARD_HEIGHT, marginRight: CARD_MARGIN }]}
             onPress={() => navigation.navigate('Historico')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityLabel="Histórico"
+            accessibilityHint="Ir para tela de histórico de registros"
+            testID="botao-historico"
           >
-              <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                <Feather name="clock" size={ICON_SIZE} color="#065f46" />
-                <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Histórico</Text>
-              </View>
+            <View style={{alignItems: 'center', justifyContent: 'center'}}>
+              <Feather name="clock" size={ICON_SIZE} color="#065f46" />
+              <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Histórico</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.card, { width: CARD_SIZE, height: CARD_HEIGHT }]}
             onPress={() => navigation.navigate('Grafico')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityLabel="Gráficos"
+            accessibilityHint="Ir para tela de gráficos"
+            testID="botao-graficos"
           >
-              <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                <FontAwesome5 name="chart-bar" size={ICON_SIZE} color="#065f46" />
-                <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Gráficos</Text>
-              </View>
+            <View style={{alignItems: 'center', justifyContent: 'center'}}>
+              <FontAwesome5 name="chart-bar" size={ICON_SIZE} color="#065f46" />
+              <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Gráficos</Text>
+            </View>
           </TouchableOpacity>
         </View>
         <View style={styles.gridRow}>
           <TouchableOpacity
             style={[styles.card, { width: CARD_SIZE, height: CARD_HEIGHT, marginRight: CARD_MARGIN }]}
             onPress={() => navigation.navigate('DAS')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityLabel="Cálculo do DAS"
+            accessibilityHint="Ir para tela de cálculo do DAS"
+            testID="botao-das"
           >
-              <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                <MaterialCommunityIcons name="calculator-variant" size={ICON_SIZE} color="#065f46" />
-                <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Cálculo do DAS</Text>
-              </View>
+            <View style={{alignItems: 'center', justifyContent: 'center'}}>
+              <MaterialCommunityIcons name="calculator-variant" size={ICON_SIZE} color="#065f46" />
+              <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Cálculo do DAS</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.card, { width: CARD_SIZE, height: CARD_HEIGHT }]}
             onPress={() => navigation.navigate('Configuracoes')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityLabel="Configurações"
+            accessibilityHint="Ir para tela de configurações"
+            testID="botao-configuracoes"
           >
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
               <View style={{alignItems: 'center', justifyContent: 'center'}}>
