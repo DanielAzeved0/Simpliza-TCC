@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, KeyboardAvoidingView, Platform, ScrollView, Pressable, Alert, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AnimatedInput from '../components/AnimatedInputGanho.js';
 import { adicionarTransacao } from '../dataBase/firebaseService.js';
@@ -8,6 +8,11 @@ export default function GanhoScreen() {
   const [ajudaVisible, setAjudaVisible] = useState(false);
   const [titulo, setTitulo] = useState('');
   const [valor, setValor] = useState('');
+  const [salvando, setSalvando] = useState(false);
+  const valorRef = useRef(null);
+  const { height } = useWindowDimensions();
+  const offsetFactor = height < 700 ? 0.10 : 0.12;
+  const formTopOffset = Math.max(16, Math.min(height * offsetFactor, 150));
 
   // Função para formatar valor como moeda brasileira
   const formatarValor = (text) => {
@@ -23,30 +28,50 @@ export default function GanhoScreen() {
     return v;
   };
 
-  const handleSalvar = () => {
-    if (!titulo || !valor) {
-      alert('Preencha todos os campos!');
+  const sanitizarParaNumero = (str) => {
+    // Remove pontos de milhar e troca vírgula por ponto
+    return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+  };
+
+  const valorNumerico = sanitizarParaNumero(valor);
+  const valorInvalido = !(valor && !isNaN(valorNumerico) && valorNumerico > 0);
+
+  const handleSalvar = async () => {
+    if (!titulo || valorInvalido) {
+      Alert.alert('Atenção', 'Preencha a descrição e um valor válido.');
       return;
     }
-    const valorNumerico = parseFloat(valor.replace(',', '.'));
-    if (isNaN(valorNumerico) || valorNumerico <= 0) {
-      alert('Digite um valor válido!');
-      return;
+    try {
+      setSalvando(true);
+      await adicionarTransacao({ tipo: 'ganho', titulo, valor: valorNumerico, categoria: 'ganho' });
+      setTitulo('');
+      setValor('');
+      Alert.alert('Pronto', 'Ganho registrado com sucesso!');
+    } catch (e) {
+      console.error('Erro ao salvar ganho:', e);
+      Alert.alert('Erro', 'Não foi possível salvar o ganho. Tente novamente.');
+    } finally {
+      setSalvando(false);
     }
-    adicionarTransacao({ tipo: 'ganho', titulo, valor: valorNumerico, categoria: 'ganho' });
-    setTitulo('');
-    setValor('');
-    alert('Ganho registrado com sucesso!');
   };
 
   return (
-    <View style={styles.container}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginBottom: 10, padding: 40}}>
-        <Text style={{ fontWeight: 'bold', fontSize: 28, color: '#065f46' }}>Registrar Ganho</Text>
-        <TouchableOpacity onPress={() => setAjudaVisible(true)}>
-          <Ionicons name="help-circle-outline" size={28} color="#065f46" />
-        </TouchableOpacity>
-      </View>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Registrar Ganho</Text>
+          <Pressable
+            onPress={() => setAjudaVisible(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir ajuda sobre registro de ganhos"
+            accessibilityHint="Mostra explicações sobre como registrar ganhos"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: true }}
+            testID="botao-ajuda-ganho"
+          >
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+          </Pressable>
+        </View>
       <Modal
         visible={ajudaVisible}
         transparent
@@ -66,40 +91,66 @@ export default function GanhoScreen() {
         </View>
       </Modal>
 
-      <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
+        <View style={[styles.formContainer, { marginTop: formTopOffset }]}>
+          <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
 
-      {/* Campo de valor com cifrão preto */}
-      <View style={styles.valorContainer}>
-        <Text style={styles.cifrao}>R$</Text>
-        <TextInput
-          style={styles.valorInput}
-          value={valor}
-          onChangeText={text => setValor(formatarValor(text))}
-          keyboardType="numeric"
-          placeholder="0,00"
-          placeholderTextColor="#888"
-          maxLength={10}
-        />
-      </View>
+          {/* Campo de valor com cifrão preto */}
+          <View style={styles.valorContainer}>
+            <Text style={styles.cifrao}>R$</Text>
+            <TextInput
+              ref={valorRef}
+              style={styles.valorInput}
+              value={valor}
+              onChangeText={text => setValor(formatarValor(text))}
+              keyboardType="numeric"
+              inputMode="numeric"
+              returnKeyType="done"
+              placeholder="0,00"
+              placeholderTextColor="#888"
+              maxLength={10}
+              accessibilityLabel="Valor do ganho"
+              testID="input-valor-ganho"
+            />
+          </View>
+          {valorInvalido && (
+            <Text style={styles.errorText}>Digite um valor válido.</Text>
+          )}
 
-      <TouchableOpacity style={styles.botao} onPress={handleSalvar}>
-        <Text style={styles.botaoTexto}>Salvar Ganho</Text>
-      </TouchableOpacity>
-    </View>
+          <Pressable
+            style={[styles.botao, (salvando || valorInvalido || !titulo) && styles.botaoDisabled]}
+            onPress={handleSalvar}
+            disabled={salvando || valorInvalido || !titulo}
+            accessibilityRole="button"
+            accessibilityLabel="Salvar ganho"
+            accessibilityHint="Registra a entrada de dinheiro informada"
+            accessibilityState={{ disabled: !!(salvando || valorInvalido || !titulo), busy: !!salvando }}
+            android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            testID="botao-salvar-ganho"
+          >
+            <Text style={styles.botaoTexto}>Salvar Ganho</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#e6f4ea', alignItems: 'center', paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#e6f4ea' },
+  content: { flexGrow: 1, padding: 20, paddingTop: 60 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 10 },
+  title: { fontWeight: 'bold', fontSize: 28, color: '#065f46' },
+  formContainer: { width: '100%' },
   valorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 5,
     borderWidth: 1.5,
-    borderColor: 'rgba(16, 185, 129, 0.7)',
-    width: '90%',
+    borderColor: '#10b981',
+    width: '100%',
     height: 50,
     marginBottom: 35,
     paddingHorizontal: 10,
@@ -119,14 +170,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     padding: 0,
   },
+  errorText: { color: '#e11d48', marginTop: -24, marginBottom: 24 },
   botao: { 
     backgroundColor: '#10b981', 
     padding: 15, 
     borderRadius: 10, 
     marginTop: 20, 
-    width: '90%', 
+    width: '100%', 
     alignItems: 'center' 
   },
+  botaoDisabled: { backgroundColor: '#8bd7be' },
   botaoTexto: { 
     color: '#fff', 
     fontWeight: 'bold'

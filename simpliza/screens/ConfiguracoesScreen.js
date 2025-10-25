@@ -38,7 +38,7 @@ const COLORS = {
   accent: '#047857',
   card: '#ecfdf5',
   danger: '#e11d48',
-  info: '#3ab12ff3',
+  info: '#0284C7',
 };
 
 const APP_INFO = {
@@ -130,7 +130,9 @@ export default function ConfiguracoesScreen() {
         return;
       }
       // Em produção: oferecer compartilhamento (Share API) ou download
-      console.log('Exported user data:', JSON.stringify(data, null, 2));
+      if (__DEV__) {
+        console.log('Exported user data:', JSON.stringify(data, null, 2));
+      }
       Alert.alert('Exportação', 'Seus dados foram preparados para exportação.');
       // Exemplo: navegar para tela onde o usuário pode baixar/visualizar termos
       navigation.navigate('Privacy');
@@ -186,7 +188,7 @@ export default function ConfiguracoesScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           {/* Título principal da tela */}
-          <Text style={styles.title}>Configurações</Text>
+          <Text style={styles.title} accessibilityRole="header">Configurações</Text>
 
           {/* Card com informações básicas do aplicativo */}
           <View style={styles.card}>
@@ -208,7 +210,7 @@ export default function ConfiguracoesScreen() {
 
           {/* Seção FAQ gerada dinamicamente a partir do array FAQS */}
           <View style={styles.saqContainer}>
-            <Text style={styles.saqTitle}>Perguntas Frequentes (FAQ)</Text>
+            <Text style={styles.saqTitle} accessibilityRole="header">Perguntas Frequentes (FAQ)</Text>
             {FAQS.map((item, idx) => (
               <View key={idx} style={styles.saqItem}>
                 <Text style={styles.saqQuestion}>• {item.q}</Text>
@@ -220,30 +222,57 @@ export default function ConfiguracoesScreen() {
           {/* Botões de ação principais: Logout, Exportar, Deletar */}
           <View style={styles.actions}>
             <Pressable
-              style={[styles.actionButton, { backgroundColor: COLORS.primary }]}
+              style={[
+                styles.actionButton,
+                { backgroundColor: COLORS.primary },
+                (loadingLogout || loadingExport || loadingDelete) && styles.actionButtonDisabled,
+              ]}
               onPress={handleLogout}
               disabled={loadingLogout || loadingExport || loadingDelete}
               accessibilityRole="button"
+              accessibilityLabel="Sair da conta"
+              accessibilityHint="Desconecta sua sessão e volta para a tela inicial"
+              accessibilityState={{ disabled: !!(loadingLogout || loadingExport || loadingDelete), busy: !!loadingLogout }}
+              android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               testID="logoutButton"
             >
               {loadingLogout ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>Sair</Text>}
             </Pressable>
 
             <Pressable
-              style={[styles.actionButton, { backgroundColor: COLORS.info, marginTop: 12 }]}
+              style={[
+                styles.actionButton,
+                { backgroundColor: COLORS.info, marginTop: 12 },
+                (loadingExport || loadingLogout || loadingDelete) && styles.actionButtonDisabled,
+              ]}
               onPress={handleExport}
               disabled={loadingExport || loadingLogout || loadingDelete}
               accessibilityRole="button"
+              accessibilityLabel="Ler termos de uso de dados"
+              accessibilityHint="Abre a tela com os termos sobre uso e privacidade dos seus dados"
+              accessibilityState={{ disabled: !!(loadingExport || loadingLogout || loadingDelete), busy: !!loadingExport }}
+              android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               testID="exportButton"
             >
               {loadingExport ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>Ler termos de uso de dados</Text>}
             </Pressable>
 
             <Pressable
-              style={[styles.actionButton, { backgroundColor: COLORS.danger, marginTop: 12 }]}
+              style={[
+                styles.actionButton,
+                { backgroundColor: COLORS.danger, marginTop: 12 },
+                (loadingDelete || loadingLogout || loadingExport) && styles.actionButtonDisabled,
+              ]}
               onPress={handleDelete}
               disabled={loadingDelete || loadingLogout || loadingExport}
               accessibilityRole="button"
+              accessibilityLabel="Solicitar exclusão de dados e conta"
+              accessibilityHint="Apaga sua conta e todos os dados após confirmação"
+              accessibilityState={{ disabled: !!(loadingDelete || loadingLogout || loadingExport), busy: !!loadingDelete }}
+              android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               testID="deleteButton"
             >
               {loadingDelete ? <ActivityIndicator color="#fff" /> : (
@@ -325,6 +354,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  actionButtonDisabled: {
+    opacity: 0.6,
   },
   actionText: {
     color: '#fff',

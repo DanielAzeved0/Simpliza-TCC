@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, useWindowDimensions, Pressable, Alert } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { getHistorico } from '../dataBase/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
 import NavBar from '../components/navBar';
 
-const screenWidth = Dimensions.get('window').width;
-
 export default function DASScreen({ navigation }) {
+  const { width: windowWidth } = useWindowDimensions();
   const [tipoEmpresa, setTipoEmpresa] = useState(null);
   const [tipoMEI, setTipoMEI] = useState(null);
   const [faturamento, setFaturamento] = useState(0);
@@ -65,9 +64,18 @@ export default function DASScreen({ navigation }) {
       <View style={styles.container}>
         <View style={{ alignItems: 'center', marginBottom: 20 }}>
           <Text style={styles.title}>Cálculo do DAS</Text>
-          <TouchableOpacity onPress={() => setAjudaVisible(true)} style={{ position: 'absolute', right: 0, top: 0 }}>
-            <Ionicons name="help-circle-outline" size={28} color="#065f46" paddingTop="25" />
-          </TouchableOpacity>
+          <Pressable
+            onPress={() => setAjudaVisible(true)}
+            style={{ position: 'absolute', right: 0, top: 0 }}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir ajuda sobre o DAS"
+            accessibilityHint="Mostra explicação sobre o documento DAS e valores"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: true }}
+            testID="botao-ajuda-das"
+          >
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+          </Pressable>
         </View>
 
         <Dropdown
@@ -79,6 +87,8 @@ export default function DASScreen({ navigation }) {
           valueField="value"
           placeholder="Selecione o tipo de empresa"
           value={tipoEmpresa}
+          accessibilityLabel="Tipo de empresa"
+          testID="dropdown-tipo-empresa"
           onChange={item => {
             setTipoEmpresa(item.value);
             setTipoMEI(null);
@@ -95,6 +105,8 @@ export default function DASScreen({ navigation }) {
             valueField="value"
             placeholder="Selecione a categoria do MEI"
             value={tipoMEI}
+            accessibilityLabel="Categoria do MEI"
+            testID="dropdown-categoria-mei"
             onChange={item => setTipoMEI(item.value)}
           />
         )}
@@ -105,12 +117,26 @@ export default function DASScreen({ navigation }) {
           </View>
         )}
 
-        <TouchableOpacity
+        <Pressable
           style={styles.linkBotao}
-          onPress={() => Linking.openURL('https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/pagamento-de-contribuicao-mensal/como-pagar-o-das')}
+          onPress={async () => {
+            const url = 'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/pagamento-de-contribuicao-mensal/como-pagar-o-das';
+            const canOpen = await Linking.canOpenURL(url);
+            if (canOpen) {
+              Linking.openURL(url);
+            } else {
+              Alert.alert('Atenção', 'Não foi possível abrir o link no dispositivo.');
+            }
+          }}
+          accessibilityRole="link"
+          accessibilityLabel="Abrir instruções de como pagar o DAS"
+          accessibilityHint="Abre o site oficial do Governo com as instruções"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          android_ripple={{ color: 'rgba(255,255,255,0.15)', borderless: false }}
+          testID="link-como-pagar-das"
         >
           <Text style={styles.linkTexto}>Como pagar o seu DAS</Text>
-        </TouchableOpacity>
+        </Pressable>
 
 
 
@@ -120,8 +146,13 @@ export default function DASScreen({ navigation }) {
           animationType="fade"
           onRequestClose={() => setAjudaVisible(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
+          <Pressable style={styles.modalOverlay} onPress={() => setAjudaVisible(false)}>
+            <Pressable
+              style={[styles.modalContent, { width: Math.min(windowWidth * 0.9, 480) }]}
+              accessibilityRole="dialog"
+              accessibilityLabel="Ajuda sobre o DAS"
+              onPress={() => {}}
+            >
               <Text style={styles.modalTexto}>
                 Você sabe o que é DAS? O Documento de Arrecadação do Simples Nacional é um guia simplificado de tributos que uma empresa optante pelo Simples Nacional deve pagar.
                 Para MEs e EPPs, o valor considera notas fiscais emitidas. Para o MEI, o pagamento é fixo por setor:
@@ -130,11 +161,19 @@ export default function DASScreen({ navigation }) {
                 {'\n'}Comércio + Serviço: R$76,60
                 {'\n'}Para MEI, o pagamento é mensal, independente do faturamento.
               </Text>
-              <TouchableOpacity style={styles.fecharBotao} onPress={() => setAjudaVisible(false)}>
+              <Pressable
+                style={styles.fecharBotao}
+                onPress={() => setAjudaVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar ajuda"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
+                testID="botao-fechar-ajuda"
+              >
                 <Text style={styles.fecharTexto}>Fechar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+              </Pressable>
+            </Pressable>
+          </Pressable>
         </Modal>
       </View>
       <NavBar onPress={handleNavBarPress} />
@@ -152,14 +191,13 @@ const styles = StyleSheet.create({
   header: {
     // Removido para centralização do título
   },
-    title: {
+  title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
-    marginBottom: 20,
     marginTop: 20,
     marginBottom: 10,
-    textAlign: "Screenleft",
+    textAlign: 'left',
     alignSelf: 'flex-start',
   },
   dropdown: {
@@ -216,7 +254,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
-    width: screenWidth - 40,
+    // largura ajustada dinamicamente via useWindowDimensions
   },
   modalTexto: {
     fontSize: 14,

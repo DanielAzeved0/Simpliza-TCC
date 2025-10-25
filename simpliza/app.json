@@ -3,6 +3,7 @@
     "name": "simpliza",
     "slug": "simpliza",
     "version": "1.0.0",
+    "scheme": "simpliza",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

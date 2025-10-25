@@ -55,7 +55,7 @@ export default function AnimatedInput({ label, value, onChangeText }) {
 const styles = StyleSheet.create({
   inputBox: {
     position: 'relative',
-    width: '90%',
+    width: '100%',
     marginBottom: 40,
   },
   input: {

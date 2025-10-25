@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import AnimatedInput from '../components/AnimatedInputGasto';
@@ -10,6 +10,9 @@ export default function GastoScreen() {
   const [titulo, setTitulo] = useState('');
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState(null);
+  const { height } = useWindowDimensions();
+  const offsetFactor = height < 700 ? 0.10 : 0.12;
+  const formTopOffset = Math.max(16, Math.min(height * offsetFactor, 150));
 
   // Função para formatar valor como moeda brasileira
   const formatarValor = (text) => {
@@ -28,12 +31,15 @@ export default function GastoScreen() {
     { label: 'Outros', value: 'outros' },
   ];
 
+  // Deriva valor numérico e estado de invalidez para feedback inline
+  const valorNumerico = parseFloat((valor || '').replace(/\./g, '').replace(',', '.'));
+  const valorInvalido = !(valor && !isNaN(valorNumerico) && valorNumerico > 0);
+
   const handleSalvar = () => {
     if (!valor || !categoria || (categoria === 'outros' && !titulo)) {
       alert('Preencha todos os campos!');
       return;
     }
-    const valorNumerico = parseFloat(valor.replace(',', '.'));
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
       alert('Digite um valor válido!');
       return;
@@ -73,6 +79,8 @@ export default function GastoScreen() {
           </View>
         </View>
       </Modal>
+
+      <View style={[styles.formContainer, { marginTop: formTopOffset }]}>
         <Dropdown
           style={styles.dropdown}
           placeholderStyle={styles.placeholderStyle}
@@ -85,34 +93,38 @@ export default function GastoScreen() {
           onChange={item => setCategoria(item.value)}    
         />
 
+        {/* Campo de descrição só aparece se categoria for 'outros' */}
+        {categoria === 'outros' && (
+          <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
+        )}
 
-      {/* Campo de descrição só aparece se categoria for 'outros' */}
-      {categoria === 'outros' && (
-        <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
-      )}
+        {/* Campo de valor com cifrão fixo */}
+        <View style={styles.valorContainer}>
+          <Text style={styles.cifrao}>R$</Text>
+          <TextInput
+            style={styles.valorInput}
+            value={valor}
+            onChangeText={text => setValor(formatarValor(text))}
+            keyboardType="numeric"
+            placeholder="0,00"
+            maxLength={10}
+          />
+        </View>
+        {valorInvalido && (
+          <Text style={styles.errorText}>Digite um valor válido.</Text>
+        )}
 
-      {/* Campo de valor com cifrão fixo */}
-      <View style={styles.valorContainer}>
-        <Text style={styles.cifrao}>R$</Text>
-        <TextInput
-          style={styles.valorInput}
-          value={valor}
-          onChangeText={text => setValor(formatarValor(text))}
-          keyboardType="numeric"
-          placeholder="0,00"
-          maxLength={10}
-        />
+        <TouchableOpacity style={styles.botao} onPress={handleSalvar}>
+          <Text style={styles.botaoTexto}>Salvar Gasto</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.botao} onPress={handleSalvar}>
-        <Text style={styles.botaoTexto}>Salvar Gasto</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fef2f2', alignItems: 'center', paddingTop: 50 },
+  formContainer: { width: '100%', alignItems: 'center' },
   dropdown: {
     width: '90%',
     height: 50,
@@ -157,6 +169,14 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     backgroundColor: 'transparent',
     padding: 0,
+  },
+  errorText: {
+    color: '#e11d48',
+    marginTop: -24,
+    marginBottom: 24,
+    width: '90%',
+    alignSelf: 'center',
+    textAlign: 'left',
   },
   botao: { backgroundColor: '#ef4444', padding: 15, borderRadius: 10, marginTop: 20 },
   botaoTexto: { color: '#fff', fontWeight: 'bold' },
