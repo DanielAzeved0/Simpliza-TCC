@@ -138,7 +138,7 @@ export default function CriarContaScreen({ navigation }) {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-                <Text style={styles.title}> sua conta</Text>
+                <Text style={styles.title}>Crie sua conta</Text>
 
                 <TextInput
                     ref={nomeRef}
