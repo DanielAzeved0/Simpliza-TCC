@@ -1,5 +1,5 @@
 // ...existing code...
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -85,6 +85,18 @@ const FAQS = [
 /* ---------- Componente principal da tela de Configurações ---------- */
 export default function ConfiguracoesScreen() {
   const navigation = useNavigation();
+  // Protege botão voltar Android para voltar para tela anterior
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation && navigation.goBack) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
 
   // Estados de loading separados para cada operação assíncrona.
   // Isso permite exibir indicadores individuais e evitar ações concorrentes.

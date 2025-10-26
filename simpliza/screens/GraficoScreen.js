@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Pressable, useWindowDimensions, Modal } from 'react-native';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { BackHandler } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Pressable, useWindowDimensions, Modal, AccessibilityInfo, findNodeHandle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
 import { getHistorico } from '../dataBase/firebaseService';
@@ -7,25 +8,53 @@ import NavBar from '../components/navBar';
 const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe', '#dfe6e9'];
 
 export default function GraficoScreen({ navigation }) {
+  // Protege botão voltar Android para voltar para tela anterior
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation && navigation.goBack) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(false);
   const [ajudaVisible, setAjudaVisible] = useState(false);
+  const ajudaFecharRef = useRef(null);
   const { width } = useWindowDimensions();
 
   useEffect(() => {
     async function carregar() {
       setLoading(true);
+      setErro(false);
       try {
         const dados = await getHistorico();
         setHistorico(Array.isArray(dados) ? dados : []);
       } catch (e) {
         setHistorico([]);
+        setErro(true);
       } finally {
         setLoading(false);
       }
     }
     carregar();
   }, []);
+
+  // Acessibilidade: foco no botão fechar ao abrir modal de ajuda
+  useEffect(() => {
+    if (ajudaVisible) {
+      setTimeout(() => {
+        if (ajudaFecharRef.current) {
+          const node = findNodeHandle(ajudaFecharRef.current);
+          if (node) AccessibilityInfo.setAccessibilityFocus(node);
+        }
+      }, 400);
+    }
+  }, [ajudaVisible]);
 
   const parseValor = (v) => {
     if (typeof v === 'string') v = v.replace(',', '.');
@@ -133,7 +162,7 @@ export default function GraficoScreen({ navigation }) {
             android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: true }}
             testID="botao-ajuda-graficos"
           >
-            <Ionicons name="help-circle-outline" size={28} color="#065f46" />
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" accessibilityLabel="Ícone de ajuda" />
           </Pressable>
         </View>
 
@@ -142,19 +171,23 @@ export default function GraficoScreen({ navigation }) {
           transparent
           animationType="fade"
           onRequestClose={() => setAjudaVisible(false)}
+          accessible
+          accessibilityViewIsModal
         >
           <View style={styles.modalOverlay}>
             <Pressable style={styles.modalBackdrop} onPress={() => setAjudaVisible(false)} />
             <View style={[styles.modalCard, { width: Math.min(width * 0.9, 480) }]} accessibilityLabel="Ajuda sobre os gráficos">
-              <Text style={styles.modalTitle}>Sobre os Gráficos</Text>
+              <Text style={styles.modalTitle} accessibilityRole="header">Sobre os Gráficos</Text>
               <Text style={styles.modalBody}>
                 Aqui você visualiza gráficos dos seus ganhos e gastos. Use para acompanhar sua evolução financeira e identificar padrões.
               </Text>
               <Pressable
+                ref={ajudaFecharRef}
                 style={styles.modalButton}
                 onPress={() => setAjudaVisible(false)}
                 accessibilityRole="button"
                 accessibilityLabel="Fechar ajuda"
+                accessibilityHint="Fecha o modal de ajuda"
               >
                 <Text style={styles.modalButtonText}>Fechar</Text>
               </Pressable>
@@ -177,11 +210,13 @@ export default function GraficoScreen({ navigation }) {
                 paddingLeft={'15'}
                 absolute
                 style={styles.chart}
+                accessible
+                accessibilityLabel="Gráfico de pizza dos maiores gastos do mês"
               />
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
                 {pieData.map((item, idx) => (
                   <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12, marginBottom: 4 }}>
-                    <View style={{ width: 12, height: 12, backgroundColor: item.color, marginRight: 4, borderRadius: 2 }} />
+                    <View style={{ width: 12, height: 12, backgroundColor: item.color, marginRight: 4, borderRadius: 2, borderWidth: 1, borderColor: '#222' }} />
                     <Text style={{ fontSize: 13 }}>{item.categoria}: {formatBRL(item.valor)}</Text>
                   </View>
                 ))}
@@ -209,6 +244,8 @@ export default function GraficoScreen({ navigation }) {
               style={[styles.chart, { minWidth: width - 40 }]}
               fromZero
               segments={5}
+              accessible
+              accessibilityLabel="Gráfico de barras comparando ganhos e gastos"
             />
           </ScrollView>
           {(somaGanhos === 0 && somaGastos === 0) && (
@@ -231,6 +268,8 @@ export default function GraficoScreen({ navigation }) {
               withHorizontalLines={true}
               fromZero
               segments={5}
+              accessible
+              accessibilityLabel="Gráfico de linhas da evolução mensal de ganhos e gastos"
             />
           </ScrollView>
           {(
@@ -240,17 +279,20 @@ export default function GraficoScreen({ navigation }) {
           )}
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 8 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 16 }}>
-              <View style={{ width: 12, height: 12, backgroundColor: '#10b981', marginRight: 4, borderRadius: 2 }} />
+              <View style={{ width: 12, height: 12, backgroundColor: '#10b981', marginRight: 4, borderRadius: 2, borderWidth: 1, borderColor: '#222' }} />
               <Text style={{ fontSize: 13 }}>Ganhos</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ width: 12, height: 12, backgroundColor: '#dc2626', marginRight: 4, borderRadius: 2 }} />
+              <View style={{ width: 12, height: 12, backgroundColor: '#dc2626', marginRight: 4, borderRadius: 2, borderWidth: 1, borderColor: '#222' }} />
               <Text style={{ fontSize: 13 }}>Gastos</Text>
             </View>
           </View>
         </View>
 
-        {loading && <ActivityIndicator style={{ marginTop: 8 }} size="large" color="#000" />}
+        {erro && (
+          <Text style={[styles.emptyText, { color: '#e11d48' }]}>Erro ao carregar dados. Tente novamente mais tarde.</Text>
+        )}
+        {loading && <ActivityIndicator style={{ marginTop: 8 }} size="large" color="#000" accessibilityLabel="Carregando gráficos" />}
       </ScrollView>
       <NavBar onPress={handleNavBarPress} />
     </View>

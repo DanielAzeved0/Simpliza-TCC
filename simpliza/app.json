@@ -14,7 +14,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +25,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.daga1011.simpliza"
+      "package": "com.daga1011.simpliza",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -35,6 +39,9 @@
       "eas": {
         "projectId": "4ccb113f-2f1e-4984-9655-948a0d21a4bc"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4ccb113f-2f1e-4984-9655-948a0d21a4bc"
     }
   }
 }

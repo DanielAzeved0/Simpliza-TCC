@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { BackHandler } from 'react-native';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -45,6 +46,18 @@ suporte@simpliza.com`;
 
 export default function PrivacyScreen() {
   const navigation = useNavigation();
+  // Protege botão voltar Android para voltar para tela anterior
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation && navigation.goBack) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const accept = async () => {
     await AsyncStorage.setItem('consentimentoLGPD', 'true');

@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { BackHandler } from 'react-native';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
 export default function NovoRegistroScreen({ navigation }) {
+  // Protege botão voltar Android para voltar para tela anterior
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation && navigation.goBack) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
   return (
     <View style={styles.container}>
 

@@ -1,15 +1,29 @@
-import React, { useRef, useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, KeyboardAvoidingView, Platform, ScrollView, Pressable, Alert, useWindowDimensions } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, KeyboardAvoidingView, Platform, ScrollView, Pressable, Alert, useWindowDimensions, ActivityIndicator, AccessibilityInfo, findNodeHandle, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AnimatedInput from '../components/AnimatedInputGanho.js';
 import { adicionarTransacao } from '../dataBase/firebaseService.js';
 
-export default function GanhoScreen() {
+export default function GanhoScreen({ navigation }) {
+  // Garante que o botão de voltar do Android só volta para a tela anterior
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation && navigation.goBack) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
   const [ajudaVisible, setAjudaVisible] = useState(false);
   const [titulo, setTitulo] = useState('');
   const [valor, setValor] = useState('');
   const [salvando, setSalvando] = useState(false);
   const valorRef = useRef(null);
+  const ajudaFecharRef = useRef(null);
+  const ajudaTituloRef = useRef(null);
   const { height } = useWindowDimensions();
   const offsetFactor = height < 700 ? 0.10 : 0.12;
   const formTopOffset = Math.max(16, Math.min(height * offsetFactor, 150));
@@ -55,6 +69,25 @@ export default function GanhoScreen() {
     }
   };
 
+  // Foco automático: ao finalizar título, ir para valor
+  const handleTituloSubmit = () => {
+    if (valorRef.current) {
+      valorRef.current.focus();
+    }
+  };
+
+  // Acessibilidade: foco no botão fechar ao abrir modal de ajuda
+  React.useEffect(() => {
+    if (ajudaVisible) {
+      setTimeout(() => {
+        if (ajudaFecharRef.current) {
+          const node = findNodeHandle(ajudaFecharRef.current);
+          if (node) AccessibilityInfo.setAccessibilityFocus(node);
+        }
+      }, 400);
+    }
+  }, [ajudaVisible]);
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -77,14 +110,28 @@ export default function GanhoScreen() {
         transparent
         animationType="fade"
         onRequestClose={() => setAjudaVisible(false)}
+        accessible
+        accessibilityViewIsModal
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '90%' }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Sobre o Registro de Ganho</Text>
+            <Text
+              ref={ajudaTituloRef}
+              style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}
+              accessibilityRole="header"
+              accessibilityLabel="Sobre o Registro de Ganho"
+            >Sobre o Registro de Ganho</Text>
             <Text style={{ marginBottom: 20 }}>
               Aqui você pode registrar entradas de dinheiro, como vendas, serviços ou outros ganhos. Preencha a descrição e o valor recebido para manter seu controle financeiro atualizado.
             </Text>
-            <TouchableOpacity style={{ alignSelf: 'center', backgroundColor: '#065f46', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8 }} onPress={() => setAjudaVisible(false)}>
+            <TouchableOpacity
+              ref={ajudaFecharRef}
+              style={{ alignSelf: 'center', backgroundColor: '#065f46', paddingVertical: 8, paddingHorizontal: 20, borderRadius: 8 }}
+              onPress={() => setAjudaVisible(false)}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar ajuda"
+              accessibilityHint="Fecha o modal de ajuda"
+            >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Fechar</Text>
             </TouchableOpacity>
           </View>
@@ -92,7 +139,16 @@ export default function GanhoScreen() {
       </Modal>
 
         <View style={[styles.formContainer, { marginTop: formTopOffset }]}>
-          <AnimatedInput label="Descrição" value={titulo} onChangeText={setTitulo} />
+          <AnimatedInput
+            label="Descrição"
+            value={titulo}
+            onChangeText={setTitulo}
+            returnKeyType="next"
+            onSubmitEditing={handleTituloSubmit}
+            blurOnSubmit={false}
+            accessibilityLabel="Descrição do ganho"
+            testID="input-descricao-ganho"
+          />
 
           {/* Campo de valor com cifrão preto */}
           <View style={styles.valorContainer}>
@@ -110,6 +166,7 @@ export default function GanhoScreen() {
               maxLength={10}
               accessibilityLabel="Valor do ganho"
               testID="input-valor-ganho"
+              accessible
             />
           </View>
           {valorInvalido && (
@@ -128,7 +185,11 @@ export default function GanhoScreen() {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             testID="botao-salvar-ganho"
           >
-            <Text style={styles.botaoTexto}>Salvar Ganho</Text>
+            {salvando ? (
+              <ActivityIndicator color="#fff" accessibilityLabel="Salvando ganho" />
+            ) : (
+              <Text style={styles.botaoTexto}>Salvar Ganho</Text>
+            )}
           </Pressable>
         </View>
       </ScrollView>
@@ -173,11 +234,14 @@ const styles = StyleSheet.create({
   errorText: { color: '#e11d48', marginTop: -24, marginBottom: 24 },
   botao: { 
     backgroundColor: '#10b981', 
-    padding: 15, 
+    height: 50,
     borderRadius: 10, 
     marginTop: 20, 
-    width: '100%', 
-    alignItems: 'center' 
+    width: '90%', 
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    padding: 0,
   },
   botaoDisabled: { backgroundColor: '#8bd7be' },
   botaoTexto: { 

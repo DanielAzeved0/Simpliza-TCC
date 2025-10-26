@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, useWindowDimensions, Pressable, Alert } from 'react-native';
+import { BackHandler } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, useWindowDimensions, Pressable, Alert, AccessibilityInfo } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { getHistorico } from '../dataBase/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
 import NavBar from '../components/navBar';
 
 export default function DASScreen({ navigation }) {
+  // Protege botão voltar Android para voltar para tela anterior
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation && navigation.goBack) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
   const { width: windowWidth } = useWindowDimensions();
   const [tipoEmpresa, setTipoEmpresa] = useState(null);
   const [tipoMEI, setTipoMEI] = useState(null);
   const [faturamento, setFaturamento] = useState(0);
   const [dasValor, setDasValor] = useState(null);
   const [ajudaVisible, setAjudaVisible] = useState(false);
+  const [error, setError] = useState('');
 
   const opcoesEmpresa = [
     { label: 'Microempreendedor Individual (MEI)', value: 'mei' },
@@ -25,9 +39,13 @@ export default function DASScreen({ navigation }) {
 
   useEffect(() => {
     async function carregarFaturamento() {
-      const historico = await getHistorico();
-      const soma = historico.reduce((total, item) => total + Number(item.valor || 0), 0);
-      setFaturamento(soma);
+      try {
+        const historico = await getHistorico();
+        const soma = historico.reduce((total, item) => total + Number(item.valor || 0), 0);
+        setFaturamento(soma);
+      } catch (e) {
+        setError('Erro ao carregar o histórico de faturamento.');
+      }
     }
     carregarFaturamento();
   }, []);
@@ -37,12 +55,15 @@ export default function DASScreen({ navigation }) {
       switch (tipoMEI) {
         case 'comercio':
           setDasValor('R$ 71,60');
+          setError('');
           break;
         case 'servico':
           setDasValor('R$ 75,60');
+          setError('');
           break;
         case 'comercio_servico':
           setDasValor('R$ 76,60');
+          setError('');
           break;
         default:
           setDasValor(null);
@@ -111,15 +132,31 @@ export default function DASScreen({ navigation }) {
           />
         )}
 
-        {dasValor && (
+        {error ? (
           <View style={styles.resultadoBox}>
-            <Text style={styles.resultadoTexto}>Valor estimado do DAS: {dasValor}</Text>
+            <Text style={styles.resultadoTexto} accessibilityLiveRegion="polite" testID="das-error">{error}</Text>
           </View>
-        )}
+        ) : dasValor ? (
+          <View style={styles.resultadoBox}>
+            <Text
+              style={styles.resultadoTexto}
+              accessibilityLabel={`Valor estimado do DAS: ${dasValor}`}
+              testID="das-value"
+              importantForAccessibility="yes"
+            >
+              Valor estimado do DAS: {dasValor}
+            </Text>
+          </View>
+        ) : null}
 
         <Pressable
           style={styles.linkBotao}
           onPress={async () => {
+            if (!dasValor || error) {
+              setError('Selecione o tipo e categoria para ver o valor do DAS antes de acessar o link.');
+              AccessibilityInfo.announceForAccessibility('Selecione o tipo e categoria para ver o valor do DAS antes de acessar o link.');
+              return;
+            }
             const url = 'https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/pagamento-de-contribuicao-mensal/como-pagar-o-das';
             const canOpen = await Linking.canOpenURL(url);
             if (canOpen) {
@@ -136,11 +173,9 @@ export default function DASScreen({ navigation }) {
           testID="link-como-pagar-das"
         >
           <Text style={styles.linkTexto}>Como pagar o seu DAS</Text>
-        </Pressable>
+  </Pressable>
 
-
-
-        <Modal
+  <Modal
           visible={ajudaVisible}
           transparent
           animationType="fade"
@@ -224,6 +259,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   linkBotao: {
     marginTop: 20,

@@ -37,8 +37,7 @@ export default function InicioScreen() {
             navigation.replace('Home');
             return;
           } else {
-            // Email não verificado, fazer logout e mostrar tela de login
-            await auth.signOut();
+            // Email não verificado, mostrar tela de login, mas não faz logout automático
             await AsyncStorage.removeItem('manterConectado');
           }
         }
@@ -69,13 +68,35 @@ export default function InicioScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bem vindo ao Simpliza!</Text>
+      <Text
+        style={styles.title}
+        accessibilityRole="header"
+        accessibilityLabel="Bem-vindo ao Simpliza"
+      >
+        Bem vindo ao Simpliza!
+      </Text>
       <PrivacyConsentModal visible={showConsent} onClose={() => setShowConsent(false)} navigation={navigation} />
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('CriarConta')}>
-        <Text style={styles.buttonText}>Criar uma conta</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('CriarConta')}
+        accessibilityRole="button"
+        accessibilityLabel="Criar uma conta"
+        accessibilityHint="Ir para tela de cadastro"
+        testID="botao-criar-conta"
+        activeOpacity={0.8}
+      >
+        <Text style={[styles.buttonText, { color: '#fff' }]}>Criar uma conta</Text>
       </TouchableOpacity>
-  <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.replace('Login')}>
-        <Text style={styles.secondaryButtonText}>Já tenho uma conta</Text>
+      <TouchableOpacity
+        style={styles.secondaryButton}
+        onPress={() => navigation.replace('Login')}
+        accessibilityRole="button"
+        accessibilityLabel="Já tenho uma conta"
+        accessibilityHint="Ir para tela de login"
+        testID="botao-login"
+        activeOpacity={0.8}
+      >
+        <Text style={[styles.secondaryButtonText, { color: '#000000ff' }]}>Já tenho uma conta</Text>
       </TouchableOpacity>
     </View>
   );

@@ -54,7 +54,22 @@ A principal função deste comando é criar um APK ou AAB do seu aplicativo Andr
 
 - Para baixar o APK leia o QR Code e baixe o aplicativo em seu celular/tablet.
 
-### 5. Observações importantes. Em seguida certifique-se q a **EAS** foi baixada usando o comando:
+### 5. Mande atualições para a produção
+Para configurar atualizações, execute o seguinte comando :
+```sh
+eas update:configure
+```
+Esse comando manda as atulições para os arquivos baixados, tanto os baixado pela a **EAS Build**, tanto os arquivos baixados por alguma loja online (Como a PlayStore, App Store, etc), após a conclusão do comando, você precisará fazer novas compilações antes de continuar para a próxima seção. 
+
+Para enviar uma atualização, execute o seguinte comando EAS CLI :
+```sh
+eas update --channel production
+```
+Este comando criará uma atualização e a disponibilizará para compilações do seu aplicativo configuradas para receber atualizações no productioncanal. Este canal é definido em eas.json .
+
+Você pode verificar se a atualização funciona forçando o fechamento do aplicativo e abrindo-o novamente duas vezes. A atualização deverá ser aplicada na segunda inicialização.
+
+### 6. Observações importantes. Em seguida certifique-se q a **EAS** foi baixada usando o comando:
 - Certifique-se de que todas as dependências estejam instaladas antes de rodar o app.
 
 ## 📂 Estrutura do Projeto

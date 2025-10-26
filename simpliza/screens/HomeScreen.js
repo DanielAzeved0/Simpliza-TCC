@@ -1,12 +1,25 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Platform, BackHandler } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Platform, BackHandler, ToastAndroid } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { AntDesign, Feather, FontAwesome5, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation }) {
+  const lastBackPress = useRef(0);
+  const [backPressCount, setBackPressCount] = useState(0);
   useFocusEffect(
     React.useCallback(() => {
-      const backAction = () => true;
+      const backAction = () => {
+        const now = Date.now();
+        if (lastBackPress.current && now - lastBackPress.current < 2000) {
+          BackHandler.exitApp();
+          return true;
+        }
+        lastBackPress.current = now;
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Pressione novamente para sair', ToastAndroid.SHORT);
+        }
+        return true;
+      };
       const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
       return () => backHandler.remove();
     }, [])
@@ -79,13 +92,14 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('DAS')}
             activeOpacity={0.7}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
             accessibilityLabel="Cálculo do DAS"
             accessibilityHint="Ir para tela de cálculo do DAS"
             testID="botao-das"
           >
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
-              <MaterialCommunityIcons name="calculator-variant" size={ICON_SIZE} color="#065f46" />
-              <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Cálculo do DAS</Text>
+              <MaterialCommunityIcons name="calculator-variant" size={ICON_SIZE} color="#065f46" accessibilityLabel="Ícone de cálculo do DAS" />
+              <Text style={[styles.cardText, { fontSize: 16, marginTop: 8, color: '#065f46' }]}>Cálculo do DAS</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
@@ -93,15 +107,14 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Configuracoes')}
             activeOpacity={0.7}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
             accessibilityLabel="Configurações"
             accessibilityHint="Ir para tela de configurações"
             testID="botao-configuracoes"
           >
-            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-              <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                <Feather name="settings" size={ICON_SIZE} color="#065f46" />
-                <Text style={[styles.cardText, { fontSize: 16, marginTop: 8 }]}>Configurações</Text>
-              </View>
+            <View style={{alignItems: 'center', justifyContent: 'center'}}>
+              <Feather name="settings" size={ICON_SIZE} color="#065f46" accessibilityLabel="Ícone de configurações" />
+              <Text style={[styles.cardText, { fontSize: 16, marginTop: 8, color: '#065f46' }]}>Configurações</Text>
             </View>
           </TouchableOpacity>
         </View>

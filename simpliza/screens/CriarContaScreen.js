@@ -24,7 +24,7 @@ export default function CriarContaScreen({ navigation }) {
     const [confirmaSenha, setConfirmaSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [verificandoEmail, setVerificandoEmail] = useState(false);
-    
+
     // Refs para navegação entre campos via teclado
     const nomeRef = useRef(null);
     const emailRef = useRef(null);
@@ -32,14 +32,14 @@ export default function CriarContaScreen({ navigation }) {
     const confirmaSenhaRef = useRef(null);
 
     const { promptAsync, request } = useGoogleAuth(navigation);
-        const [consentido, setConsentido] = useState(false);
+    const [consentido, setConsentido] = useState(false);
 
-        useEffect(() => {
-            (async () => {
-                const v = await AsyncStorage.getItem('consentimentoLGPD');
-                setConsentido(v === 'true');
-            })();
-        }, []);
+    useEffect(() => {
+        (async () => {
+            const v = await AsyncStorage.getItem('consentimentoLGPD');
+            setConsentido(v === 'true');
+        })();
+    }, []);
 
     // Função para validar formato do email
     const validarFormatoEmail = (email) => {
@@ -109,7 +109,7 @@ export default function CriarContaScreen({ navigation }) {
             );
         } catch (error) {
             let errorMessage = 'Erro ao criar conta';
-            
+
             if (error.code === 'auth/email-already-in-use') {
                 errorMessage = 'Este email já está sendo usado por outra conta';
             } else if (error.code === 'auth/invalid-email') {
@@ -119,7 +119,7 @@ export default function CriarContaScreen({ navigation }) {
             } else if (error.message) {
                 errorMessage = error.message;
             }
-            
+
             Alert.alert('Erro', errorMessage);
         }
     };
@@ -138,14 +138,15 @@ export default function CriarContaScreen({ navigation }) {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-                <Text style={styles.title}>Crie sua conta</Text>
+                <Text style={styles.title}> sua conta</Text>
 
-                <TextInput 
+                <TextInput
                     ref={nomeRef}
-                    style={styles.input} 
-                    placeholder="Nome" 
-                    onChangeText={setNome} 
+                    style={styles.input}
+                    placeholder="Nome"
+                    onChangeText={setNome}
                     value={nome}
+                    placeholderTextColor="#000000ff"
                     maxLength={50}
                     autoCapitalize="words"
                     autoCorrect={false}
@@ -158,17 +159,18 @@ export default function CriarContaScreen({ navigation }) {
                     testID="input-nome"
                 />
 
-                <TextInput 
+                <TextInput
                     ref={emailRef}
                     style={[
-                        styles.input, 
+                        styles.input,
                         emailFormatoInvalido ? styles.inputError : null
-                    ]} 
-                    placeholder="E-mail" 
+                    ]}
+                    placeholder="E-mail"
                     onChangeText={setEmail}
                     onBlur={() => setEmail((prev) => prev.trim().toLowerCase())}
-                    value={email} 
-                    keyboardType="email-address" 
+                    value={email}
+                    placeholderTextColor="#000000ff"
+                    keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
                     textContentType="emailAddress"
@@ -194,6 +196,7 @@ export default function CriarContaScreen({ navigation }) {
                         secureTextEntry={!mostrarSenha}
                         onChangeText={setSenha}
                         value={senha}
+                        placeholderTextColor="#000000ff"
                         autoCapitalize="none"
                         autoCorrect={false}
                         textContentType="newPassword"
@@ -228,6 +231,7 @@ export default function CriarContaScreen({ navigation }) {
                         secureTextEntry={!mostrarSenha}
                         onChangeText={setConfirmaSenha}
                         value={confirmaSenha}
+                        placeholderTextColor="#000000ff"
                         autoCapitalize="none"
                         autoCorrect={false}
                         textContentType="newPassword"
@@ -251,8 +255,8 @@ export default function CriarContaScreen({ navigation }) {
                 )}
 
                 <View style={styles.buttonsContainer}>
-                    <TouchableOpacity 
-                        style={[styles.button, (verificandoEmail || formularioInvalido) && styles.buttonDisabled]} 
+                    <TouchableOpacity
+                        style={[styles.button, (verificandoEmail || formularioInvalido) && styles.buttonDisabled]}
                         onPress={criarConta}
                         disabled={verificandoEmail || formularioInvalido}
                         accessibilityRole="button"
@@ -290,8 +294,8 @@ const styles = StyleSheet.create({
     input: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 15, alignSelf: 'stretch', width: '100%' },
     inputError: { borderColor: '#ff4444', borderWidth: 2 },
     errorText: { color: '#ff4444', fontSize: 12, marginBottom: 10, marginLeft: 5, alignSelf: 'stretch', width: '100%', textAlign: 'left' },
-    passwordContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 10, marginBottom: 15, alignSelf: 'stretch', width: '100%' },
-    inputSenha: { flex: 1, padding: 14 },
+    passwordContainer: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 15, alignSelf: 'stretch', width: '100%', flexDirection: 'row', alignItems: 'center', borderWidth: 0 },
+    inputSenha: { flex: 1, padding: 2 },
     buttonsContainer: { alignItems: 'center', marginTop: 10, width: '100%', alignSelf: 'center' },
     button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 10, alignSelf: 'stretch', width: '100%' },
     buttonDisabled: { backgroundColor: '#cccccc' },

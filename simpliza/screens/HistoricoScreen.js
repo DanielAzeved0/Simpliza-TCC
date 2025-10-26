@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { BackHandler } from 'react-native';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +8,18 @@ import { getHistorico, updateTransacao, deleteTransacao } from '../dataBase/fire
 import NavBar from '../components/navBar';
 
 export default function HistoricoScreen({ navigation }) {
+  // Protege botão voltar Android para voltar para tela anterior
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation && navigation.goBack) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
   const [ajudaVisible, setAjudaVisible] = useState(false);
   const [transacoes, setTransacoes] = useState([]);
   const [filtro, setFiltro] = useState('todos');
@@ -76,7 +89,10 @@ export default function HistoricoScreen({ navigation }) {
     await updateTransacao(registroSelecionado.id, {
       ...registroSelecionado,
       titulo: tituloEdit,
-      descricao: registroSelecionado?.tipo === 'ganho' ? descricaoEdit : registroSelecionado.descricao,
+      descricao:
+        registroSelecionado?.tipo === 'ganho'
+          ? descricaoEdit
+          : (registroSelecionado.descricao ?? ''),
       valor: parseFloat(valorEdit.replace(',', '.')),
       categoria: categoriaEdit
     });
@@ -115,7 +131,14 @@ export default function HistoricoScreen({ navigation }) {
     const categoriaLabel = categorias.find(c => c.value === item.categoria)?.label || item.categoria;
     return (
       <View style={[styles.item, item.tipo === 'ganho' ? styles.ganho : styles.gasto, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
-        <TouchableOpacity style={{ flex: 1 }} onPress={() => abrirModalEdicao(item)}>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          onPress={() => abrirModalEdicao(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Editar registro de ${categoriaLabel}`}
+          accessibilityHint="Abre o modal para editar este registro"
+          testID={`item-editar-${item.id}`}
+        >
           <Text style={styles.categoria}>{categoriaLabel}</Text>
           {!(item.tipo === 'gasto' && item.categoria !== 'outros') && (
             <Text style={styles.descricao}>{item.titulo}</Text>
@@ -125,8 +148,15 @@ export default function HistoricoScreen({ navigation }) {
           </Text>
           <Text style={styles.data}>{dataFormatada}</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeletePress(item.id)} style={{ marginLeft: 10 }}>
-          <MaterialIcons name="delete" size={26} color="#065f46" />
+        <TouchableOpacity
+          onPress={() => handleDeletePress(item.id)}
+          style={{ marginLeft: 10 }}
+          accessibilityRole="button"
+          accessibilityLabel={`Excluir registro de ${categoriaLabel}`}
+          accessibilityHint="Abre o modal de confirmação para excluir este registro"
+          testID={`item-excluir-${item.id}`}
+        >
+          <MaterialIcons name="delete" size={26} color="#065f46" accessibilityLabel="Ícone de lixeira" />
         </TouchableOpacity>
       </View>
     );
@@ -195,8 +225,14 @@ export default function HistoricoScreen({ navigation }) {
       <View style={styles.container}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text style={styles.title}>Histórico</Text>
-          <TouchableOpacity onPress={() => setAjudaVisible(true)}>
-            <Ionicons name="help-circle-outline" size={28} color="#065f46"  paddingTop="50" />
+          <TouchableOpacity
+            onPress={() => setAjudaVisible(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir ajuda sobre o histórico"
+            accessibilityHint="Mostra explicações sobre como usar o histórico"
+            testID="botao-ajuda-historico"
+          >
+            <Ionicons name="help-circle-outline" size={28} color="#065f46" accessibilityLabel="Ícone de ajuda" />
           </TouchableOpacity>
         </View>
         <Modal
@@ -222,6 +258,10 @@ export default function HistoricoScreen({ navigation }) {
           <TouchableOpacity
             style={[styles.botaoFiltro, filtro === 'todos' && styles.botaoAtivo]}
             onPress={() => setFiltro('todos')}
+            accessibilityRole="button"
+            accessibilityLabel="Filtrar todos os registros"
+            accessibilityState={{ selected: filtro === 'todos' }}
+            testID="filtro-todos"
           >
             <Text style={[styles.textoFiltro, filtro === 'todos' && styles.textoAtivo]}>Todos</Text>
           </TouchableOpacity>
@@ -229,6 +269,10 @@ export default function HistoricoScreen({ navigation }) {
           <TouchableOpacity
             style={[styles.botaoFiltro, filtro === 'ganho' && styles.botaoAtivo]}
             onPress={() => setFiltro('ganho')}
+            accessibilityRole="button"
+            accessibilityLabel="Filtrar apenas ganhos"
+            accessibilityState={{ selected: filtro === 'ganho' }}
+            testID="filtro-ganho"
           >
             <Text style={[styles.textoFiltro, filtro === 'ganho' && styles.textoAtivo]}>Ganhos</Text>
           </TouchableOpacity>
@@ -236,6 +280,10 @@ export default function HistoricoScreen({ navigation }) {
           <TouchableOpacity
             style={[styles.botaoFiltro, filtro === 'gasto' && styles.botaoAtivo]}
             onPress={() => setFiltro('gasto')}
+            accessibilityRole="button"
+            accessibilityLabel="Filtrar apenas gastos"
+            accessibilityState={{ selected: filtro === 'gasto' }}
+            testID="filtro-gasto"
           >
             <Text style={[styles.textoFiltro, filtro === 'gasto' && styles.textoAtivo]}>Gastos</Text>
           </TouchableOpacity>

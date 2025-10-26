@@ -71,7 +71,7 @@ export default function LoginScreen({ navigation }) {
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
-                    placeholderTextColor="#888888"
+                    placeholderTextColor="#000000ff"
                     keyboardType="email-address"
                     autoComplete="email"
                     returnKeyType="next"
@@ -90,7 +90,7 @@ export default function LoginScreen({ navigation }) {
                         secureTextEntry={!mostrarSenha}
                         value={senha}
                         onChangeText={setSenha}
-                        placeholderTextColor="#888888"
+                        placeholderTextColor="#000000ff"
                         autoComplete="password"
                         returnKeyType="done"
                         onSubmitEditing={login}
@@ -124,7 +124,7 @@ export default function LoginScreen({ navigation }) {
                 </View>
 
                 <TouchableOpacity
-                    style={styles.button}
+                    style={[styles.button, (!email.trim() || !senha) && styles.buttonDisabled]}
                     onPress={login}
                     activeOpacity={0.7}
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -132,6 +132,7 @@ export default function LoginScreen({ navigation }) {
                     accessibilityLabel="Concluir Login"
                     accessibilityHint="Fazer login com e-mail e senha"
                     testID="botao-login"
+                    disabled={!email.trim() || !senha}
                 >
                     <Text style={styles.buttonText}>Concluir Login</Text>
                 </TouchableOpacity>
@@ -199,6 +200,7 @@ const styles = StyleSheet.create({
         color: '#333333'
     },
     button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 15 },
+    buttonDisabled: { backgroundColor: '#cccccc' },
     buttonText: { color: 'white', fontSize: 18 },
     googleButton: { backgroundColor: '#fff', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 10, borderColor: '#ccc', borderWidth: 1 },
     googleText: { color: '#000' },
