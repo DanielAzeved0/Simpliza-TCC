@@ -63,7 +63,7 @@ Esse comando manda as atulições para os arquivos baixados, tanto os baixado pe
 
 Para enviar uma atualização, execute o seguinte comando EAS CLI :
 ```sh
-eas update --channel production
+eas update --channel preview
 ```
 Este comando criará uma atualização e a disponibilizará para compilações do seu aplicativo configuradas para receber atualizações no productioncanal. Este canal é definido em eas.json .
 
