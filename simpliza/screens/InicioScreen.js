@@ -31,18 +31,10 @@ export default function InicioScreen() {
         // Usuário está logado, verificar se deve manter conectado
         const manterConectado = await AsyncStorage.getItem('manterConectado');
         if (manterConectado === 'true') {
-          // Verificar se o email foi verificado
-          await user.reload(); // Recarregar dados do usuário
-          if (user.emailVerified) {
-            navigation.replace('Home');
-            return;
-          } else {
-            // Email não verificado, mostrar tela de login, mas não faz logout automático
-            await AsyncStorage.removeItem('manterConectado');
-          }
+          navigation.replace('Home');
+          return;
         }
       }
-      
       // Verificar consentimento LGPD apenas se não estiver logado
       try {
         const v = await AsyncStorage.getItem('consentimentoLGPD');
@@ -50,10 +42,8 @@ export default function InicioScreen() {
       } catch (e) {
         setShowConsent(true);
       }
-      
       setIsLoading(false);
     });
-
     return unsubscribe;
   }, [navigation]);
 

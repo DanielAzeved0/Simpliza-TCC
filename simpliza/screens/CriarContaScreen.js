@@ -23,6 +23,8 @@ export default function CriarContaScreen({ navigation }) {
     const [senha, setSenha] = useState('');
     const [confirmaSenha, setConfirmaSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
+    const [senhaEmFoco, setSenhaEmFoco] = useState(false);
+    const [confirmaSenhaEmFoco, setConfirmaSenhaEmFoco] = useState(false);
     const [verificandoEmail, setVerificandoEmail] = useState(false);
 
     // Refs para navegação entre campos via teclado
@@ -138,7 +140,7 @@ export default function CriarContaScreen({ navigation }) {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-                <Text style={styles.title}>Crie sua conta</Text>
+                <Text style={styles.title}> Crie sua conta</Text>
 
                 <TextInput
                     ref={nomeRef}
@@ -206,6 +208,8 @@ export default function CriarContaScreen({ navigation }) {
                         onSubmitEditing={() => confirmaSenhaRef.current?.focus()}
                         blurOnSubmit={false}
                         testID="input-senha"
+                        onFocus={() => setSenhaEmFoco(true)}
+                        onBlur={() => setSenhaEmFoco(false)}
                     />
                     <TouchableOpacity
                         onPress={() => setMostrarSenha(!mostrarSenha)}
@@ -240,6 +244,8 @@ export default function CriarContaScreen({ navigation }) {
                         enablesReturnKeyAutomatically
                         onSubmitEditing={criarConta}
                         testID="input-confirma-senha"
+                        onFocus={() => setConfirmaSenhaEmFoco(true)}
+                        onBlur={() => setConfirmaSenhaEmFoco(false)}
                     />
                     <TouchableOpacity
                         onPress={() => setMostrarSenha(!mostrarSenha)}

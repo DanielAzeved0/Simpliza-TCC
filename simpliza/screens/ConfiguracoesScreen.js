@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Platform,
+  BackHandler,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 

@@ -93,15 +93,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff', // fundo branco para contraste com ícones
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     borderTopWidth: 2,
     borderColor: '#d1fae5', // borda sutil na parte superior
-    elevation: 10, // sombra para Android
+    elevation: 0, // sombra para Android
     shadowColor: '#000', // sombras para iOS
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-    marginBottom: 38, // cria espaço abaixo da barra para evitar sobreposição
+    marginBottom: 5, // cria espaço abaixo da barra para evitar sobreposição
   },
 
   // Estilo dos botões laterais (Início, Histórico, Gráficos, DAS)

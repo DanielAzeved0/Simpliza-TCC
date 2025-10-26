@@ -140,7 +140,7 @@ export default function GastoScreen({ navigation }) {
         </View>
       </Modal>
 
-      <View style={[styles.formContainer, { marginTop: formTopOffset }]}> 
+      <View style={[styles.formContainer, { marginTop: formTopOffset }]}>
         <Dropdown
           style={styles.dropdown}
           placeholderStyle={styles.placeholderStyle}
@@ -150,7 +150,7 @@ export default function GastoScreen({ navigation }) {
           valueField="value"
           placeholder="Categorias"
           value={categoria}
-          onChange={item => setCategoria(item.value)}    
+          onChange={item => setCategoria(item.value)}
           accessibilityLabel="Categoria do gasto"
           testID="dropdown-categoria-gasto"
         />
@@ -169,7 +169,7 @@ export default function GastoScreen({ navigation }) {
           />
         )}
 
-        {/* Campo de valor com cifrão fixo */}
+        {/* Campo de valor com cifrão preto */}
         <View style={styles.valorContainer}>
           <Text style={styles.cifrao}>R$</Text>
           <TextInput
@@ -178,10 +178,13 @@ export default function GastoScreen({ navigation }) {
             value={valor}
             onChangeText={text => setValor(formatarValor(text))}
             keyboardType="numeric"
+            inputMode="numeric"
+            returnKeyType="done"
             placeholder="0,00"
+            placeholderTextColor="#888"
             maxLength={10}
-            accessibilityLabel="Valor do gasto"
-            testID="input-valor-gasto"
+            accessibilityLabel="Valor do ganho"
+            testID="input-valor-ganho"
             accessible
           />
         </View>
