@@ -281,7 +281,7 @@ export default function ConfiguracoesScreen() {
               onPress={handleDelete}
               disabled={loadingDelete || loadingLogout || loadingExport}
               accessibilityRole="button"
-              accessibilityLabel="Solicitar exclusão de dados e conta"
+              accessibilityLabel="Excluir conta"
               accessibilityHint="Apaga sua conta e todos os dados após confirmação"
               accessibilityState={{ disabled: !!(loadingDelete || loadingLogout || loadingExport), busy: !!loadingDelete }}
               android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
@@ -289,7 +289,7 @@ export default function ConfiguracoesScreen() {
               testID="deleteButton"
             >
               {loadingDelete ? <ActivityIndicator color="#fff" /> : (
-                <Text style={styles.actionText}>Solicitar exclusão de dados e conta</Text>
+                <Text style={styles.actionText}>Excluir conta</Text>
               )}
             </Pressable>
           </View>

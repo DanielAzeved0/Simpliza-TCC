@@ -80,8 +80,6 @@ export default function GraficoScreen({ navigation }) {
       name: key === 'mercado' ? 'comida' : key,
       population: value,
       color: cores[index % cores.length],
-      legendFontColor: '#7F7F7F',
-      legendFontSize: 15,
       categoria: key === 'mercado' ? 'comida' : key,
       valor: value
     }));
@@ -200,19 +198,22 @@ export default function GraficoScreen({ navigation }) {
           <Text style={styles.subtitulo}>Maiores Gastos do Mês</Text>
           {pieData.length > 0 ? (
             <>
-              <PieChart
-                data={pieData}
-                width={width - 40}
-                height={240}
-                chartConfig={chartConfig}
-                accessor={'population'}
-                backgroundColor={'transparent'}
-                paddingLeft={'15'}
-                absolute
-                style={styles.chart}
-                accessible
-                accessibilityLabel="Gráfico de pizza dos maiores gastos do mês"
-              />
+              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <PieChart
+                  data={pieData}
+                  width={width - 40}
+                  height={240}
+                  chartConfig={chartConfig}
+                  accessor={'population'}
+                  backgroundColor={'transparent'}
+                  center={[0, 0]}
+                  absolute
+                  hasLegend={false}
+                  style={[styles.chart, { alignSelf: 'center' }]}
+                  accessible
+                  accessibilityLabel="Gráfico de pizza dos maiores gastos do mês"
+                />
+              </View>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
                 {pieData.map((item, idx) => (
                   <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12, marginBottom: 4 }}>
