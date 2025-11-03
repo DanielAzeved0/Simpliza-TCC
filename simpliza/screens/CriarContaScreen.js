@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     inputError: { borderColor: '#ff4444', borderWidth: 2 },
     errorText: { color: '#ff4444', fontSize: 12, marginBottom: 10, marginLeft: 5, alignSelf: 'stretch', width: '100%', textAlign: 'left' },
     passwordContainer: { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 15, alignSelf: 'stretch', width: '100%', flexDirection: 'row', alignItems: 'center', borderWidth: 0 },
-    inputSenha: { flex: 1, padding: 2 },
+    inputSenha: { flex: 1, padding: 0, color: '#000', fontSize: 16 },
     buttonsContainer: { alignItems: 'center', marginTop: 10, width: '100%', alignSelf: 'center' },
     button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 10, alignSelf: 'stretch', width: '100%' },
     buttonDisabled: { backgroundColor: '#cccccc' },

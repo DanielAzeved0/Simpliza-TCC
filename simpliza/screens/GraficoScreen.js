@@ -198,18 +198,18 @@ export default function GraficoScreen({ navigation }) {
           <Text style={styles.subtitulo}>Maiores Gastos do Mês</Text>
           {pieData.length > 0 ? (
             <>
-              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <View style={styles.pieChartContainer}>
                 <PieChart
                   data={pieData}
-                  width={width - 40}
-                  height={240}
+                  width={width - 60}
+                  height={220}
                   chartConfig={chartConfig}
                   accessor={'population'}
                   backgroundColor={'transparent'}
-                  center={[0, 0]}
+                  center={[(width - 60) / 4, 0]}
                   absolute
                   hasLegend={false}
-                  style={[styles.chart, { alignSelf: 'center' }]}
+                  style={styles.pieChart}
                   accessible
                   accessibilityLabel="Gráfico de pizza dos maiores gastos do mês"
                 />
@@ -257,14 +257,19 @@ export default function GraficoScreen({ navigation }) {
         {/* Gráfico de Linhas */}
         <View style={{ marginBottom: 32 }}>
           <Text style={styles.subtitulo}>Evolução Mensal</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentOffset={{ x: (new Date().getMonth() * 50) - (width / 3), y: 0 }}
+            style={styles.lineChartScrollView}
+          >
             <LineChart
               data={lineChartData}
-              width={Math.max(width, 60 * lineChartData.labels.length)}
+              width={Math.max(width * 1.5, 70 * lineChartData.labels.length)}
               height={240}
               chartConfig={chartConfig}
               bezier
-              style={[styles.chart, { minWidth: width - 40 }]}
+              style={[styles.chart, { minWidth: width * 1.5 }]}
               withVerticalLines={true}
               withHorizontalLines={true}
               fromZero
@@ -338,6 +343,19 @@ const styles = StyleSheet.create({
   chart: {
     marginBottom: 20,
     borderRadius: 16,
+  },
+  pieChartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  pieChart: {
+    borderRadius: 16,
+    alignSelf: 'center',
+  },
+  lineChartScrollView: {
+    flex: 1,
   },
   emptyText: {
     textAlign: 'center',
