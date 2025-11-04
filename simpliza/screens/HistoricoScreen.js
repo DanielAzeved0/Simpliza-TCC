@@ -156,7 +156,12 @@ export default function HistoricoScreen({ navigation }) {
           accessibilityHint="Abre o modal de confirmação para excluir este registro"
           testID={`item-excluir-${item.id}`}
         >
-          <MaterialIcons name="delete" size={26} color="#065f46" accessibilityLabel="Ícone de lixeira" />
+          <MaterialIcons
+            name="delete"
+            size={26}
+            color={item.tipo === 'gasto' ? '#dc2626' : '#065f46'}
+            accessibilityLabel="Ícone de lixeira"
+          />
         </TouchableOpacity>
       </View>
     );
@@ -423,7 +428,7 @@ export default function HistoricoScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   gastoModalContent: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: '#f7f7f7ff',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -462,7 +467,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmModalContent: {
-    backgroundColor: '#d1fae5',
+    backgroundColor: '#f7f7f7ff',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -615,5 +620,5 @@ const styles = StyleSheet.create({
   selectedTextStyle: {
     fontSize: 14,
     color: '#333',
-  },
+  }
 });
