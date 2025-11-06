@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,9 @@ import NavBar from '../components/navBar';
 export default function HistoricoScreen({ navigation }) {
   // Protege botão voltar Android para voltar para tela anterior
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       if (navigation && navigation.goBack) {
         navigation.goBack();
@@ -175,10 +178,9 @@ export default function HistoricoScreen({ navigation }) {
   };
 
   const handleNavBarPress = (screen) => {
-    if (screen === 'Inicio') navigation.navigate('Home');
-    else if (screen === 'Historico') navigation.navigate('Historico');
+    if (screen === 'Graficos') navigation.navigate('Grafico');
+    else if (screen === 'Historico') return; // Já estamos na tela de Histórico
     else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
-    else if (screen === 'Graficos') navigation.navigate('Grafico');
     else if (screen === 'DAS') navigation.navigate('DAS');
     else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
   };

@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
 export default function NovoRegistroScreen({ navigation }) {
   // Protege botão voltar Android para voltar para tela anterior
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       if (navigation && navigation.goBack) {
         navigation.goBack();
@@ -80,9 +83,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
     elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 1 },
+    ...(Platform.OS === 'web' 
+      ? { boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)' }
+      : {
+          shadowColor: '#000',
+          shadowOpacity: 0.1,
+          shadowOffset: { width: 0, height: 1 },
+        }
+    ),
   },
   ganho: {
     backgroundColor: '#ecfdf5',

@@ -58,7 +58,7 @@ export default function useGoogleAuth(navigation) {
         // Salvar preferência para manter conectado (padrão para login Google)
         await AsyncStorage.setItem('manterConectado', 'true');
 
-        navigation.replace('Home');
+        navigation.replace('Grafico');
       }
     }
 

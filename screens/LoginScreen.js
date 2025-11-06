@@ -1,6 +1,6 @@
 // LoginScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, BackHandler } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, BackHandler, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Checkbox, Provider as PaperProvider } from 'react-native-paper';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -10,6 +10,9 @@ import useGoogleAuth from '../dataBase/googleAuth';
 
 export default function LoginScreen({ navigation }) {
     useEffect(() => {
+        // BackHandler só funciona em Android/iOS, não na web
+        if (Platform.OS === 'web') return;
+        
         const backAction = () => {
             navigation.replace('Inicio');
             return true;
@@ -41,7 +44,7 @@ export default function LoginScreen({ navigation }) {
             if (manterConectado) {
                 await AsyncStorage.setItem('manterConectado', 'true');
             }
-            navigation.replace('Home');
+            navigation.replace('Grafico');
         } catch (error) {
             let errorMessage = 'Erro ao fazer login';
             

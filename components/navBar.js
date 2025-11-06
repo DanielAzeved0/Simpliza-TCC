@@ -10,24 +10,24 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
  *             indicando qual botão foi pressionado.
  *
  * Estrutura:
- *  - 5 botões: Início, Histórico, NovoRegistro (central), Gráficos, DAS
+ *  - 5 botões: Gráficos, Histórico, NovoRegistro (central), DAS, Configurações
  *  - Botão central é destacado visualmente (maior e "flutuante")
  */
 const NavBar = ({ onPress }) => {
   return (
     // Container principal que organiza os itens em linha (horizontal)
     <View style={styles.container}>
-      {/* INÍCIO
+      {/* GRÁFICOS (substitui Início)
           - TouchableOpacity captura o toque do usuário
-          - Ao pressionar chama onPress('Inicio') se o callback existir
+          - Ao pressionar chama onPress('Graficos') se o callback existir
           - Ícone + rótulo abaixo */}
       <TouchableOpacity
         style={styles.iconButton}
-        onPress={() => onPress && onPress('Inicio')}
-        accessibilityLabel="Botão Início"
+        onPress={() => onPress && onPress('Graficos')}
+        accessibilityLabel="Botão Gráficos"
       >
-        <Ionicons name="home-outline" size={32} color="#065f46" />
-        <Text style={styles.label}>Início</Text>
+        <Ionicons name="stats-chart-outline" size={28} color="#065f46" />
+        <Text style={styles.label}>Gráficos</Text>
       </TouchableOpacity>
 
       {/* HISTÓRICO
@@ -52,17 +52,6 @@ const NavBar = ({ onPress }) => {
         <Ionicons name="add-circle-outline" size={60} color="#065f46" />
       </TouchableOpacity>
 
-      {/* GRÁFICOS
-          - Acessa a tela de estatísticas/relatórios */}
-      <TouchableOpacity
-        style={styles.iconButton}
-        onPress={() => onPress && onPress('Graficos')}
-        accessibilityLabel="Botão Gráficos"
-      >
-        <Ionicons name="stats-chart-outline" size={28} color="#065f46" />
-        <Text style={styles.label}>Gráficos</Text>
-      </TouchableOpacity>
-
       {/* CÁLCULO DO DAS
           - Ação para abrir calculadora/funcionalidade relacionada ao DAS */}
       <TouchableOpacity
@@ -70,8 +59,19 @@ const NavBar = ({ onPress }) => {
         onPress={() => onPress && onPress('DAS')}
         accessibilityLabel="Botão Cálculo DAS"
       >
-        <MaterialCommunityIcons name="file-document-edit-outline" size={30} color="#065f46" />
+        <MaterialCommunityIcons name="calculator-variant" size={30} color="#065f46" />
         <Text style={styles.label}>Cálculo DAS</Text>
+      </TouchableOpacity>
+
+      {/* CONFIGURAÇÕES (novo botão)
+          - Acessa a tela de configurações do app */}
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={() => onPress && onPress('Configuracoes')}
+        accessibilityLabel="Botão Configurações"
+      >
+        <Ionicons name="settings-outline" size={28} color="#065f46" />
+        <Text style={styles.label}>Config.</Text>
       </TouchableOpacity>
     </View>
   );

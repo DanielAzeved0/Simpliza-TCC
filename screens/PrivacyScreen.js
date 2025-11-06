@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -48,6 +48,9 @@ export default function PrivacyScreen() {
   const navigation = useNavigation();
   // Protege botão voltar Android para voltar para tela anterior
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       if (navigation && navigation.goBack) {
         navigation.goBack();

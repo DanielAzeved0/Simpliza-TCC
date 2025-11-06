@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, useWindowDimensions, Alert, ActivityIndicator, AccessibilityInfo, findNodeHandle, BackHandler } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, useWindowDimensions, Alert, ActivityIndicator, AccessibilityInfo, findNodeHandle, BackHandler, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import AnimatedInput from '../components/AnimatedInputGasto';
@@ -8,6 +8,9 @@ import { adicionarTransacao } from '../dataBase/firebaseService';
 export default function GastoScreen({ navigation }) {
   // Garante que o botão de voltar do Android só volta para a tela anterior
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       if (navigation && navigation.goBack) {
         navigation.goBack();

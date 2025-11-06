@@ -1,29 +1,45 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform, ToastAndroid } from 'react-native';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Pressable, useWindowDimensions, Modal, AccessibilityInfo, findNodeHandle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
 import { getHistorico } from '../dataBase/firebaseService';
+import { useFocusEffect } from '@react-navigation/native';
+import { auth, db } from '../dataBase/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 import NavBar from '../components/navBar';
+import { showLogoutConfirmation } from '../components/logoutHelper';
 const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe', '#dfe6e9'];
 
 export default function GraficoScreen({ navigation }) {
-  // Protege botão voltar Android para voltar para tela anterior
-  useEffect(() => {
-    const backAction = () => {
-      if (navigation && navigation.goBack) {
-        navigation.goBack();
+  const lastBackPress = useRef(0);
+  // Protege botão voltar Android para sair do app (tela inicial)
+  useFocusEffect(
+    React.useCallback(() => {
+      // BackHandler só funciona em Android/iOS, não na web
+      if (Platform.OS === 'web') return;
+      
+      const backAction = () => {
+        const now = Date.now();
+        if (lastBackPress.current && now - lastBackPress.current < 2000) {
+          BackHandler.exitApp();
+          return true;
+        }
+        lastBackPress.current = now;
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Pressione novamente para sair', ToastAndroid.SHORT);
+        }
         return true;
-      }
-      return false;
-    };
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove();
-  }, [navigation]);
+      };
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+      return () => backHandler.remove();
+    }, [])
+  );
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(false);
   const [ajudaVisible, setAjudaVisible] = useState(false);
+  const [nomeUsuario, setNomeUsuario] = useState('');
   const ajudaFecharRef = useRef(null);
   const { width } = useWindowDimensions();
 
@@ -32,8 +48,19 @@ export default function GraficoScreen({ navigation }) {
       setLoading(true);
       setErro(false);
       try {
+        // Buscar histórico
         const dados = await getHistorico();
         setHistorico(Array.isArray(dados) ? dados : []);
+        
+        // Buscar nome do usuário
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setNomeUsuario(userData.nome || 'Usuário');
+          }
+        }
       } catch (e) {
         setHistorico([]);
         setErro(true);
@@ -136,11 +163,15 @@ export default function GraficoScreen({ navigation }) {
   }), [ganhosPorMes, gastosPorMes]);
 
   const handleNavBarPress = (screen) => {
-    if (screen === 'Inicio') navigation.navigate('Home');
+    if (screen === 'Graficos') return; // Já estamos na tela de Gráficos
     else if (screen === 'Historico') navigation.navigate('Historico');
     else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
-    else if (screen === 'Graficos') navigation.navigate('Grafico');
     else if (screen === 'DAS') navigation.navigate('DAS');
+    else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
+  };
+
+  const handleLogout = () => {
+    showLogoutConfirmation(navigation);
   };
 
 
@@ -150,18 +181,34 @@ export default function GraficoScreen({ navigation }) {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
         <View style={styles.headerRow}>
-          <Text accessibilityRole="header" style={styles.titleText}>Gráficos</Text>
-          <Pressable
-            onPress={() => setAjudaVisible(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir ajuda sobre os gráficos"
-            accessibilityHint="Mostra explicações sobre como ler os gráficos"
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: true }}
-            testID="botao-ajuda-graficos"
-          >
-            <Ionicons name="help-circle-outline" size={28} color="#065f46" accessibilityLabel="Ícone de ajuda" />
-          </Pressable>
+          <Text accessibilityRole="header" style={styles.titleText}>
+            Bem-vindo, {nomeUsuario || 'Usuário'}
+          </Text>
+          <View style={styles.headerButtons}>
+            <Pressable
+              onPress={() => setAjudaVisible(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir ajuda sobre os gráficos"
+              accessibilityHint="Mostra explicações sobre como ler os gráficos"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: true }}
+              testID="botao-ajuda-graficos"
+              style={{ marginRight: 12 }}
+            >
+              <Ionicons name="help-circle-outline" size={28} color="#065f46" accessibilityLabel="Ícone de ajuda" />
+            </Pressable>
+            <Pressable
+              onPress={handleLogout}
+              accessibilityRole="button"
+              accessibilityLabel="Fazer logout"
+              accessibilityHint="Sair da conta atual"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: true }}
+              testID="botao-logout"
+            >
+              <Ionicons name="log-out-outline" size={28} color="#dc2626" accessibilityLabel="Ícone de logout" />
+            </Pressable>
+          </View>
         </View>
 
         <Modal
@@ -323,8 +370,14 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontWeight: 'bold',
-    fontSize: 28,
+    fontSize: 22,
     color: '#065f46',
+    flex: 1,
+    marginRight: 8,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,

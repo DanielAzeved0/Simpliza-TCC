@@ -7,6 +7,9 @@ import { adicionarTransacao } from '../dataBase/firebaseService.js';
 export default function GanhoScreen({ navigation }) {
   // Garante que o botão de voltar do Android só volta para a tela anterior
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       if (navigation && navigation.goBack) {
         navigation.goBack();

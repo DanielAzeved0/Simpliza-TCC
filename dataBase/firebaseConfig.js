@@ -1,9 +1,10 @@
 // Importa as funções necessárias do SDK do Firebase
 import { initializeApp } from 'firebase/app'; // Inicializa o aplicativo Firebase
 import { getFirestore } from 'firebase/firestore'; // Obtém o serviço Firestore para banco de dados
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth'; // Obtém o serviço de autenticação do Firebase
+import { getAuth, initializeAuth, getReactNativePersistence, browserLocalPersistence } from 'firebase/auth'; // Obtém o serviço de autenticação do Firebase
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 // Configuração do Firebase para conectar o aplicativo ao projeto no Firebase
 const extra = (Constants?.expoConfig?.extra) || (Constants?.manifest?.extra) || {};
@@ -30,10 +31,19 @@ if (__DEV__) {
 // Inicializa o aplicativo Firebase com a configuração fornecida
 const app = initializeApp(firebaseConfig);
 
-// Inicializa o serviço de autenticação do Firebase com persistência AsyncStorage
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+// Inicializa o serviço de autenticação do Firebase com persistência adequada para cada plataforma
+let auth;
+if (Platform.OS === 'web') {
+  // Na web, usa browserLocalPersistence
+  auth = initializeAuth(app, {
+    persistence: browserLocalPersistence
+  });
+} else {
+  // Em mobile (Android/iOS), usa AsyncStorage
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+}
 
 // Inicializa o serviço Firestore para operações no banco de dados
 const db = getFirestore(app);

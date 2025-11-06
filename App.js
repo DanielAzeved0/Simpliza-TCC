@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import HomeScreen from './screens/HomeScreen.js';
 import NovoRegistroScreen from './screens/NovoRegistroScreen.js';
 import GanhoScreen from './screens/GanhoScreen.js';
 import GastoScreen from './screens/GastoScreen.js';
@@ -25,7 +24,6 @@ export default function App() {
         <Stack.Screen name="Inicio" component={InicioScreen} />
         <Stack.Screen name="CriarConta" component={CriarContaScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="NovoRegistro" component={NovoRegistroScreen} />
         <Stack.Screen name="Ganho" component={GanhoScreen} />
         <Stack.Screen name="Gasto" component={GastoScreen} />

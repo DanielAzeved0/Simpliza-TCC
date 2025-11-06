@@ -13,6 +13,9 @@ export default function InicioScreen() {
 
   // Bloquear botão de voltar para sair do app
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       // Sai do app ao pressionar voltar na tela de início
       if (Platform.OS === 'android') {
@@ -31,7 +34,7 @@ export default function InicioScreen() {
         // Usuário está logado, verificar se deve manter conectado
         const manterConectado = await AsyncStorage.getItem('manterConectado');
         if (manterConectado === 'true') {
-          navigation.replace('Home');
+          navigation.replace('Grafico');
           return;
         }
       }

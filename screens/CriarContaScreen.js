@@ -11,6 +11,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CriarContaScreen({ navigation }) {
     useEffect(() => {
+        // BackHandler só funciona em Android/iOS, não na web
+        if (Platform.OS === 'web') return;
+        
         const backAction = () => {
             navigation.replace('Inicio');
             return true;

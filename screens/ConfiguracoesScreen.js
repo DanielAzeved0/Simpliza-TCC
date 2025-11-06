@@ -16,7 +16,9 @@ import { useNavigation } from '@react-navigation/native';
 
 // Import das funções do serviço Firebase (logout, exportação, exclusão)
 // Mantê-las centralizadas em um arquivo evita duplicação e facilita testes.
-import { logoutUser, exportUserData, deleteUserDataAndAccount } from '../dataBase/firebaseService';
+import { exportUserData, deleteUserDataAndAccount } from '../dataBase/firebaseService';
+import NavBar from '../components/navBar';
+import { showLogoutConfirmation } from '../components/logoutHelper';
 
 /**
  * ConfiguracoesScreen
@@ -88,6 +90,9 @@ export default function ConfiguracoesScreen() {
   const navigation = useNavigation();
   // Protege botão voltar Android para voltar para tela anterior
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       if (navigation && navigation.goBack) {
         navigation.goBack();
@@ -107,26 +112,15 @@ export default function ConfiguracoesScreen() {
 
   /**
    * handleLogout
-   * Faz logout do usuário chamando a função do serviço.
+   * Exibe confirmação e faz logout do usuário usando o helper reutilizável.
    * Usa navigation.replace para limpar histórico de navegação após logout.
    */
-  const handleLogout = useCallback(async () => {
-    try {
-      setLoadingLogout(true);
-      const ok = await logoutUser(); // função do serviço Firebase
-      if (ok) {
-        // Substitui a pilha de navegação para evitar retorno à telas autenticadas
-        navigation.replace('Inicio');
-      } else {
-        Alert.alert('Erro', 'Não foi possível sair da conta.');
-      }
-    } catch (err) {
-      // Log para debug; em produção considere enviar para Sentry/serviço de logs
-      console.error('Logout error:', err);
-      Alert.alert('Erro', 'Ocorreu um erro ao desconectar. Tente novamente.');
-    } finally {
-      setLoadingLogout(false);
-    }
+  const handleLogout = useCallback(() => {
+    showLogoutConfirmation(
+      navigation,
+      () => setLoadingLogout(false), // onSuccess
+      () => setLoadingLogout(false)  // onError
+    );
   }, [navigation]);
 
   /**
@@ -192,6 +186,18 @@ export default function ConfiguracoesScreen() {
       ],
       { cancelable: true }
     );
+  }, [navigation]);
+
+  /**
+   * handleNavBarPress
+   * Gerencia a navegação da barra inferior
+   */
+  const handleNavBarPress = useCallback((screen) => {
+    if (screen === 'Graficos') navigation.navigate('Grafico');
+    else if (screen === 'Historico') navigation.navigate('Historico');
+    else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
+    else if (screen === 'DAS') navigation.navigate('DAS');
+    else if (screen === 'Configuracoes') return; // Já estamos na tela de Configurações
   }, [navigation]);
 
   /* ---------- Render da interface ---------- */
@@ -295,6 +301,7 @@ export default function ConfiguracoesScreen() {
           </View>
         </View>
       </ScrollView>
+      <NavBar onPress={handleNavBarPress} />
     </SafeAreaView>
   );
 }

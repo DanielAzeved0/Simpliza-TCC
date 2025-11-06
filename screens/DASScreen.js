@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, useWindowDimensions, Pressable, Alert, AccessibilityInfo } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { getHistorico } from '../dataBase/firebaseService';
@@ -9,6 +9,9 @@ import NavBar from '../components/navBar';
 export default function DASScreen({ navigation }) {
   // Protege botão voltar Android para voltar para tela anterior
   useEffect(() => {
+    // BackHandler só funciona em Android/iOS, não na web
+    if (Platform.OS === 'web') return;
+    
     const backAction = () => {
       if (navigation && navigation.goBack) {
         navigation.goBack();
@@ -74,10 +77,10 @@ export default function DASScreen({ navigation }) {
   }, [tipoEmpresa, tipoMEI]);
 
   const handleNavBarPress = (screen) => {
-    if (screen === 'Inicio') navigation.navigate('Home');
+    if (screen === 'Graficos') navigation.navigate('Grafico');
     else if (screen === 'Historico') navigation.navigate('Historico');
     else if (screen === 'NovoRegistro') navigation.navigate('NovoRegistro');
-    else if (screen === 'Graficos') navigation.navigate('Grafico');
+    else if (screen === 'DAS') return; // Já estamos na tela de DAS
     else if (screen === 'Configuracoes') navigation.navigate('Configuracoes');
   };
   return (
