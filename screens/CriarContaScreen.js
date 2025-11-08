@@ -1,12 +1,13 @@
 // CriarContaScreen.js
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, BackHandler } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, BackHandler } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../dataBase/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import useGoogleAuth from '../dataBase/googleAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomAlert from '../components/CustomAlert';
 
 
 export default function CriarContaScreen({ navigation }) {
@@ -29,6 +30,8 @@ export default function CriarContaScreen({ navigation }) {
     const [senhaEmFoco, setSenhaEmFoco] = useState(false);
     const [confirmaSenhaEmFoco, setConfirmaSenhaEmFoco] = useState(false);
     const [verificandoEmail, setVerificandoEmail] = useState(false);
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ type: 'info', title: '', message: '' });
 
     // Refs para navegação entre campos via teclado
     const nomeRef = useRef(null);
@@ -69,16 +72,24 @@ export default function CriarContaScreen({ navigation }) {
 
         // Validações básicas
         if (!nomeTrim) {
-            return Alert.alert('Erro', 'Nome é obrigatório');
+            setAlertConfig({ type: 'error', title: 'Erro', message: 'Nome é obrigatório' });
+            setAlertVisible(true);
+            return;
         }
         if (!emailNorm) {
-            return Alert.alert('Erro', 'Email é obrigatório');
+            setAlertConfig({ type: 'error', title: 'Erro', message: 'Email é obrigatório' });
+            setAlertVisible(true);
+            return;
         }
         if (senha.length < 8) {
-            return Alert.alert('Erro', 'Sua senha deve conter ao menos 8 dígitos');
+            setAlertConfig({ type: 'error', title: 'Erro', message: 'Sua senha deve conter ao menos 8 dígitos' });
+            setAlertVisible(true);
+            return;
         }
         if (senha !== confirmaSenha) {
-            return Alert.alert('Erro', 'As senhas não coincidem');
+            setAlertConfig({ type: 'error', title: 'Erro', message: 'As senhas não coincidem' });
+            setAlertVisible(true);
+            return;
         }
 
         // Validar email antes de criar conta
@@ -87,7 +98,9 @@ export default function CriarContaScreen({ navigation }) {
             await validarEmail(emailNorm);
         } catch (error) {
             setVerificandoEmail(false);
-            return Alert.alert('Email Inválido', error.message);
+            setAlertConfig({ type: 'error', title: 'Email Inválido', message: error.message });
+            setAlertVisible(true);
+            return;
         }
         setVerificandoEmail(false);
 
@@ -102,16 +115,13 @@ export default function CriarContaScreen({ navigation }) {
                 dataCriacao: new Date().toISOString()
             });
 
-            Alert.alert(
-                'Conta criada!',
-                'Sua conta foi criada com sucesso.',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => navigation.navigate('Login')
-                    }
-                ]
-            );
+            setAlertConfig({
+                type: 'success',
+                title: 'Conta criada!',
+                message: 'Sua conta foi criada com sucesso.',
+            });
+            setAlertVisible(true);
+            setTimeout(() => navigation.navigate('Login'), 2000);
         } catch (error) {
             let errorMessage = 'Erro ao criar conta';
 
@@ -125,7 +135,8 @@ export default function CriarContaScreen({ navigation }) {
                 errorMessage = error.message;
             }
 
-            Alert.alert('Erro', errorMessage);
+            setAlertConfig({ type: 'error', title: 'Erro', message: errorMessage });
+            setAlertVisible(true);
         }
     };
 
@@ -280,7 +291,15 @@ export default function CriarContaScreen({ navigation }) {
                     <TouchableOpacity
                         style={styles.googleButton}
                         onPress={async () => {
-                            if (!consentido) return Alert.alert('Consentimento', 'Você precisa aceitar a política de privacidade antes de usar login via Google.');
+                            if (!consentido) {
+                                setAlertConfig({
+                                    type: 'warning',
+                                    title: 'Consentimento',
+                                    message: 'Você precisa aceitar a política de privacidade antes de usar login via Google.',
+                                });
+                                setAlertVisible(true);
+                                return;
+                            }
                             promptAsync();
                         }}
                         disabled={!request}
@@ -292,6 +311,13 @@ export default function CriarContaScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            <CustomAlert
+                visible={alertVisible}
+                type={alertConfig.type}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                onClose={() => setAlertVisible(false)}
+            />
         </KeyboardAvoidingView>
     );
 }

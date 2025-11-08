@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, KeyboardAvoidingView, Platform, ScrollView, Pressable, Alert, useWindowDimensions, ActivityIndicator, AccessibilityInfo, findNodeHandle, BackHandler } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, KeyboardAvoidingView, Platform, ScrollView, Pressable, useWindowDimensions, ActivityIndicator, AccessibilityInfo, findNodeHandle, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AnimatedInput from '../components/AnimatedInputGanho.js';
 import { adicionarTransacao } from '../dataBase/firebaseService.js';
+import CustomAlert from '../components/CustomAlert';
 
 export default function GanhoScreen({ navigation }) {
   // Garante que o botão de voltar do Android só volta para a tela anterior
@@ -24,6 +25,8 @@ export default function GanhoScreen({ navigation }) {
   const [titulo, setTitulo] = useState('');
   const [valor, setValor] = useState('');
   const [salvando, setSalvando] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ type: 'info', title: '', message: '' });
   const valorRef = useRef(null);
   const ajudaFecharRef = useRef(null);
   const ajudaTituloRef = useRef(null);
@@ -55,7 +58,12 @@ export default function GanhoScreen({ navigation }) {
 
   const handleSalvar = async () => {
     if (!titulo || valorInvalido) {
-      Alert.alert('Atenção', 'Preencha a descrição e um valor válido.');
+      setAlertConfig({
+        type: 'warning',
+        title: 'Atenção',
+        message: 'Preencha a descrição e um valor válido.'
+      });
+      setAlertVisible(true);
       return;
     }
     try {
@@ -63,10 +71,20 @@ export default function GanhoScreen({ navigation }) {
       await adicionarTransacao({ tipo: 'ganho', titulo, valor: valorNumerico, categoria: 'ganho' });
       setTitulo('');
       setValor('');
-      Alert.alert('Pronto', 'Ganho registrado com sucesso!');
+      setAlertConfig({
+        type: 'success',
+        title: 'Pronto!',
+        message: 'Ganho registrado com sucesso!'
+      });
+      setAlertVisible(true);
     } catch (e) {
       console.error('Erro ao salvar ganho:', e);
-      Alert.alert('Erro', 'Não foi possível salvar o ganho. Tente novamente.');
+      setAlertConfig({
+        type: 'error',
+        title: 'Erro',
+        message: 'Não foi possível salvar o ganho. Tente novamente.'
+      });
+      setAlertVisible(true);
     } finally {
       setSalvando(false);
     }
@@ -196,6 +214,15 @@ export default function GanhoScreen({ navigation }) {
           </Pressable>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertVisible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 }

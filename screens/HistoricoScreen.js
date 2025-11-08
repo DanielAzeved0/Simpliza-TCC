@@ -193,37 +193,41 @@ export default function HistoricoScreen({ navigation }) {
         transparent
         animationType="fade"
         onRequestClose={() => setConfirmVisible(false)}
+        statusBarTranslucent
       >
-        <View style={styles.confirmModalOverlay}>
-          <View style={styles.modalContent}>
-            <MaterialIcons name="delete" size={38} color="#065f46" style={{ alignSelf: 'center', marginBottom: 10 }} />
-            <Text style={{ fontSize: 16, color: '#065f46', fontWeight: 'bold', marginBottom: 12, textAlign: 'center' }}>
-              Deseja realmente excluir este registro?
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalContainer}>
+            {/* Ícone de lixeira */}
+            <View style={styles.deleteIconContainer}>
+              <MaterialIcons name="delete-outline" size={56} color="#dc2626" />
+            </View>
+
+            {/* Título */}
+            <Text style={styles.deleteModalTitle}>Excluir Registro</Text>
+
+            {/* Mensagem */}
+            <Text style={styles.deleteModalMessage}>
+              Você tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
             </Text>
-            <View style={{ flexDirection: 'row', marginTop: 8, justifyContent: 'center' }}>
+
+            {/* Botões */}
+            <View style={styles.deleteButtonContainer}>
               <TouchableOpacity
+                style={[styles.deleteButton, styles.deleteCancelButton]}
                 onPress={() => setConfirmVisible(false)}
-                style={{
-                  backgroundColor: '#fff',
-                  borderRadius: 8,
-                  paddingVertical: 8,
-                  paddingHorizontal: 18,
-                  borderWidth: 1,
-                  borderColor: '#065f46',
-                  marginRight: 8,
-                }}>
-                <Text style={{ color: '#065f46', fontWeight: 'bold' }}>Cancelar</Text>
+                accessibilityRole="button"
+                accessibilityLabel="Cancelar exclusão"
+              >
+                <Text style={styles.deleteCancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
+                style={[styles.deleteButton, styles.deleteConfirmButton]}
                 onPress={() => excluirRegistroDireto(deleteId)}
-                style={{
-                  backgroundColor: '#065f46',
-                  borderRadius: 8,
-                  paddingVertical: 8,
-                  paddingHorizontal: 18,
-                  marginLeft: 8,
-                }}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Excluir</Text>
+                accessibilityRole="button"
+                accessibilityLabel="Confirmar exclusão"
+              >
+                <Text style={styles.deleteConfirmButtonText}>Excluir</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -429,6 +433,80 @@ export default function HistoricoScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  deleteModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  deleteModalContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 28,
+    width: '100%',
+    maxWidth: 360,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  deleteIconContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#fee2e2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  deleteModalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  deleteModalMessage: {
+    fontSize: 16,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: 28,
+    lineHeight: 24,
+    paddingHorizontal: 8,
+  },
+  deleteButtonContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 12,
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteCancelButton: {
+    backgroundColor: '#f3f4f6',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  deleteCancelButtonText: {
+    color: '#4b5563',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deleteConfirmButton: {
+    backgroundColor: '#dc2626',
+  },
+  deleteConfirmButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   gastoModalContent: {
     backgroundColor: '#f7f7f7ff',
     borderRadius: 16,
@@ -461,12 +539,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  confirmModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   confirmModalContent: {
     backgroundColor: '#f7f7f7ff',

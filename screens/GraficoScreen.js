@@ -3,16 +3,27 @@ import { BackHandler, Platform, ToastAndroid } from 'react-native';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Pressable, useWindowDimensions, Modal, AccessibilityInfo, findNodeHandle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BarChart, PieChart, LineChart } from 'react-native-chart-kit';
-import { getHistorico } from '../dataBase/firebaseService';
+import { getHistorico, logoutUser } from '../dataBase/firebaseService';
 import { useFocusEffect } from '@react-navigation/native';
 import { auth, db } from '../dataBase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import NavBar from '../components/navBar';
-import { showLogoutConfirmation } from '../components/logoutHelper';
+import CustomAlert from '../components/CustomAlert';
 const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe', '#dfe6e9'];
 
 export default function GraficoScreen({ navigation }) {
   const lastBackPress = useRef(0);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ 
+    type: 'info', 
+    title: '', 
+    message: '', 
+    twoButtons: false,
+    onConfirm: null,
+    onCancel: null,
+    confirmText: 'Confirmar',
+    cancelText: 'Cancelar'
+  });
   // Protege botão voltar Android para sair do app (tela inicial)
   useFocusEffect(
     React.useCallback(() => {
@@ -171,7 +182,49 @@ export default function GraficoScreen({ navigation }) {
   };
 
   const handleLogout = () => {
-    showLogoutConfirmation(navigation);
+    setAlertConfig({
+      type: 'warning',
+      title: 'Confirmar Saída',
+      message: 'Tem certeza que deseja sair da sua conta?',
+      twoButtons: true,
+      confirmText: 'Sair',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          setAlertVisible(false);
+          const success = await logoutUser();
+          if (success) {
+            navigation.replace('Inicio');
+          } else {
+            setAlertConfig({
+              type: 'error',
+              title: 'Erro',
+              message: 'Não foi possível sair. Tente novamente.',
+              twoButtons: false
+            });
+            setAlertVisible(true);
+          }
+        } catch (err) {
+          console.error('Logout error:', err);
+          setAlertConfig({
+            type: 'error',
+            title: 'Erro',
+            message: 'Falha ao sair. Tente novamente mais tarde.',
+            twoButtons: false
+          });
+          setAlertVisible(true);
+        }
+      },
+      onCancel: () => {
+        setAlertVisible(false);
+      },
+      customColors: {
+        color: '#dc2626',
+        bgColor: '#fee2e2',
+        iconColor: '#dc2626'
+      }
+    });
+    setAlertVisible(true);
   };
 
 
@@ -347,6 +400,21 @@ export default function GraficoScreen({ navigation }) {
         )}
         {loading && <ActivityIndicator style={{ marginTop: 8 }} size="large" color="#000" accessibilityLabel="Carregando gráficos" />}
       </ScrollView>
+
+      <CustomAlert
+        visible={alertVisible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertVisible(false)}
+        twoButtons={alertConfig.twoButtons}
+        onConfirm={alertConfig.onConfirm}
+        onCancel={alertConfig.onCancel}
+        confirmText={alertConfig.confirmText}
+        cancelText={alertConfig.cancelText}
+        customColors={alertConfig.customColors}
+      />
+
       <NavBar onPress={handleNavBarPress} />
     </View>
   );
@@ -370,7 +438,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontWeight: 'bold',
-    fontSize: 22,
+    fontSize: 26,
     color: '#065f46',
     flex: 1,
     marginRight: 8,

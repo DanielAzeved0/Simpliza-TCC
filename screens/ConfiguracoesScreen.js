@@ -6,19 +6,20 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  Alert,
   ScrollView,
   ActivityIndicator,
   Platform,
   BackHandler,
+  Modal,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 // Import das funções do serviço Firebase (logout, exportação, exclusão)
 // Mantê-las centralizadas em um arquivo evita duplicação e facilita testes.
-import { exportUserData, deleteUserDataAndAccount } from '../dataBase/firebaseService';
+import { exportUserData, deleteUserDataAndAccount, logoutUser } from '../dataBase/firebaseService';
 import NavBar from '../components/navBar';
-import { showLogoutConfirmation } from '../components/logoutHelper';
+import CustomAlert from '../components/CustomAlert';
 
 /**
  * ConfiguracoesScreen
@@ -109,18 +110,69 @@ export default function ConfiguracoesScreen() {
   const [loadingLogout, setLoadingLogout] = useState(false);
   const [loadingExport, setLoadingExport] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ 
+    type: 'info', 
+    title: '', 
+    message: '', 
+    twoButtons: false,
+    onConfirm: null,
+    onCancel: null,
+    confirmText: 'Confirmar',
+    cancelText: 'Cancelar'
+  });
 
   /**
    * handleLogout
-   * Exibe confirmação e faz logout do usuário usando o helper reutilizável.
-   * Usa navigation.replace para limpar histórico de navegação após logout.
+   * Exibe modal de confirmação customizado para logout.
    */
   const handleLogout = useCallback(() => {
-    showLogoutConfirmation(
-      navigation,
-      () => setLoadingLogout(false), // onSuccess
-      () => setLoadingLogout(false)  // onError
-    );
+    setAlertConfig({
+      type: 'warning',
+      title: 'Confirmar Saída',
+      message: 'Tem certeza que deseja sair da sua conta?',
+      twoButtons: true,
+      confirmText: 'Sair',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          setLoadingLogout(true);
+          setAlertVisible(false);
+          const success = await logoutUser();
+          if (success) {
+            navigation.replace('Inicio');
+          } else {
+            setAlertConfig({
+              type: 'error',
+              title: 'Erro',
+              message: 'Não foi possível sair. Tente novamente.',
+              twoButtons: false
+            });
+            setAlertVisible(true);
+          }
+        } catch (err) {
+          console.error('Logout error:', err);
+          setAlertConfig({
+            type: 'error',
+            title: 'Erro',
+            message: 'Falha ao sair. Tente novamente mais tarde.',
+            twoButtons: false
+          });
+          setAlertVisible(true);
+        } finally {
+          setLoadingLogout(false);
+        }
+      },
+      onCancel: () => {
+        setAlertVisible(false);
+      },
+      customColors: {
+        color: '#dc2626',
+        bgColor: '#fee2e2',
+        iconColor: '#dc2626'
+      }
+    });
+    setAlertVisible(true);
   }, [navigation]);
 
   /**
@@ -133,19 +185,34 @@ export default function ConfiguracoesScreen() {
       setLoadingExport(true);
       const data = await exportUserData(); // função do serviço que retorna dados do usuário
       if (!data) {
-        Alert.alert('Erro', 'Não foi possível exportar seus dados.');
+        setAlertConfig({
+          type: 'error',
+          title: 'Erro',
+          message: 'Não foi possível exportar seus dados.',
+        });
+        setAlertVisible(true);
         return;
       }
       // Em produção: oferecer compartilhamento (Share API) ou download
       if (__DEV__) {
         console.log('Exported user data:', JSON.stringify(data, null, 2));
       }
-      Alert.alert('Exportação', 'Seus dados foram preparados para exportação.');
+      setAlertConfig({
+        type: 'success',
+        title: 'Exportação',
+        message: 'Seus dados foram preparados para exportação.',
+      });
+      setAlertVisible(true);
       // Exemplo: navegar para tela onde o usuário pode baixar/visualizar termos
-      navigation.navigate('Privacy');
+      setTimeout(() => navigation.navigate('Privacy'), 1500);
     } catch (err) {
       console.error('Export error:', err);
-      Alert.alert('Erro', 'Falha ao exportar dados. Tente novamente mais tarde.');
+      setAlertConfig({
+        type: 'error',
+        title: 'Erro',
+        message: 'Falha ao exportar dados. Tente novamente mais tarde.',
+      });
+      setAlertVisible(true);
     } finally {
       setLoadingExport(false);
     }
@@ -153,39 +220,62 @@ export default function ConfiguracoesScreen() {
 
   /**
    * handleDelete
-   * Exibe confirmação antes de excluir dados + conta do usuário.
-   * Operação destrutiva: usar Alert com botão "destructive" em iOS/Android.
+   * Exibe modal de confirmação antes de excluir dados + conta do usuário.
    */
   const handleDelete = useCallback(() => {
-    Alert.alert(
-      'Confirmar exclusão',
-      'Tem certeza que deseja excluir todos os seus dados e a conta? Esta ação é irreversível.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoadingDelete(true);
-              const ok = await deleteUserDataAndAccount(); // função do serviço
-              if (ok) {
-                Alert.alert('Pronto', 'Sua conta e dados foram excluídos.');
-                navigation.replace('Inicio');
-              } else {
-                Alert.alert('Erro', 'Não foi possível excluir sua conta agora.');
-              }
-            } catch (err) {
-              console.error('Delete account error:', err);
-              Alert.alert('Erro', 'Falha ao excluir conta. Tente novamente mais tarde.');
-            } finally {
-              setLoadingDelete(false);
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    setAlertConfig({
+      type: 'error',
+      title: 'Excluir Conta',
+      message: 'Tem certeza que deseja excluir todos os seus dados e a conta? Esta ação é irreversível e permanente.',
+      twoButtons: true,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          setLoadingDelete(true);
+          setAlertVisible(false);
+          const ok = await deleteUserDataAndAccount();
+          if (ok) {
+            setAlertConfig({
+              type: 'success',
+              title: 'Pronto',
+              message: 'Sua conta e dados foram excluídos.',
+              twoButtons: false
+            });
+            setAlertVisible(true);
+            setTimeout(() => navigation.replace('Inicio'), 2000);
+          } else {
+            setAlertConfig({
+              type: 'error',
+              title: 'Erro',
+              message: 'Não foi possível excluir sua conta agora.',
+              twoButtons: false
+            });
+            setAlertVisible(true);
+          }
+        } catch (err) {
+          console.error('Delete account error:', err);
+          setAlertConfig({
+            type: 'error',
+            title: 'Erro',
+            message: 'Falha ao excluir conta. Tente novamente mais tarde.',
+            twoButtons: false
+          });
+          setAlertVisible(true);
+        } finally {
+          setLoadingDelete(false);
+        }
+      },
+      onCancel: () => {
+        setAlertVisible(false);
+      },
+      customColors: {
+        color: '#dc2626',
+        bgColor: '#fee2e2',
+        iconColor: '#dc2626'
+      }
+    });
+    setAlertVisible(true);
   }, [navigation]);
 
   /**
@@ -301,6 +391,21 @@ export default function ConfiguracoesScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <CustomAlert
+        visible={alertVisible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertVisible(false)}
+        twoButtons={alertConfig.twoButtons}
+        onConfirm={alertConfig.onConfirm}
+        onCancel={alertConfig.onCancel}
+        confirmText={alertConfig.confirmText}
+        cancelText={alertConfig.cancelText}
+        customColors={alertConfig.customColors}
+      />
+
       <NavBar onPress={handleNavBarPress} />
     </SafeAreaView>
   );

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BackHandler, Platform } from 'react-native';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, useWindowDimensions, Pressable, Alert, AccessibilityInfo } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Modal, useWindowDimensions, Pressable, AccessibilityInfo } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { getHistorico } from '../dataBase/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
 import NavBar from '../components/navBar';
+import CustomAlert from '../components/CustomAlert';
 
 export default function DASScreen({ navigation }) {
   // Protege botão voltar Android para voltar para tela anterior
@@ -29,6 +30,8 @@ export default function DASScreen({ navigation }) {
   const [dasValor, setDasValor] = useState(null);
   const [ajudaVisible, setAjudaVisible] = useState(false);
   const [error, setError] = useState('');
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ type: 'info', title: '', message: '' });
 
   const opcoesEmpresa = [
     { label: 'Microempreendedor Individual (MEI)', value: 'mei' },
@@ -165,7 +168,12 @@ export default function DASScreen({ navigation }) {
             if (canOpen) {
               Linking.openURL(url);
             } else {
-              Alert.alert('Atenção', 'Não foi possível abrir o link no dispositivo.');
+              setAlertConfig({
+                type: 'warning',
+                title: 'Atenção',
+                message: 'Não foi possível abrir o link no dispositivo.',
+              });
+              setAlertVisible(true);
             }
           }}
           accessibilityRole="link"
@@ -213,6 +221,13 @@ export default function DASScreen({ navigation }) {
           </Pressable>
         </Modal>
       </View>
+      <CustomAlert
+        visible={alertVisible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertVisible(false)}
+      />
       <NavBar onPress={handleNavBarPress} />
     </View>
   );

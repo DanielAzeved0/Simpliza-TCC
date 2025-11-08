@@ -22,7 +22,7 @@
     "date-fns": "^4.1.0",
     "expo": "~53.0.12",
     "expo-auth-session": "~6.2.1",
-    "expo-dev-client": "~5.2.1",
+    "expo-dev-client": "~5.2.4",
     "expo-sqlite": "~15.2.12",
     "expo-status-bar": "~2.2.3",
     "expo-web-browser": "~14.2.0",

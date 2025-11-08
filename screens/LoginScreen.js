@@ -1,12 +1,13 @@
 // LoginScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, BackHandler, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, BackHandler, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Checkbox, Provider as PaperProvider } from 'react-native-paper';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../dataBase/firebaseConfig';
 import useGoogleAuth from '../dataBase/googleAuth';
+import CustomAlert from '../components/CustomAlert';
 
 export default function LoginScreen({ navigation }) {
     useEffect(() => {
@@ -24,6 +25,8 @@ export default function LoginScreen({ navigation }) {
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [manterConectado, setManterConectado] = useState(false);
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ type: 'info', title: '', message: '' });
     const emailRef = React.useRef(null);
     const senhaRef = React.useRef(null);
 
@@ -56,7 +59,8 @@ export default function LoginScreen({ navigation }) {
                 errorMessage = 'Email inválido';
             }
             
-            Alert.alert('Erro', errorMessage);
+            setAlertConfig({ type: 'error', title: 'Erro', message: errorMessage });
+            setAlertVisible(true);
         }
     };
 
@@ -143,7 +147,15 @@ export default function LoginScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.googleButton}
                     onPress={async () => {
-                        if (!consentido) return Alert.alert('Consentimento', 'Você precisa aceitar a política de privacidade antes de usar login via Google.');
+                        if (!consentido) {
+                            setAlertConfig({
+                                type: 'warning',
+                                title: 'Consentimento',
+                                message: 'Você precisa aceitar a política de privacidade antes de usar login via Google.',
+                            });
+                            setAlertVisible(true);
+                            return;
+                        }
                         promptAsync();
                     }}
                     disabled={!request}
@@ -171,6 +183,13 @@ export default function LoginScreen({ navigation }) {
                 </TouchableOpacity>
 
             </View>
+            <CustomAlert
+                visible={alertVisible}
+                type={alertConfig.type}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                onClose={() => setAlertVisible(false)}
+            />
         </PaperProvider>
     );
 }

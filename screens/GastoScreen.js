@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, useWindowDimensions, Alert, ActivityIndicator, AccessibilityInfo, findNodeHandle, BackHandler, Platform } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, TextInput, Modal, useWindowDimensions, ActivityIndicator, AccessibilityInfo, findNodeHandle, BackHandler, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import AnimatedInput from '../components/AnimatedInputGasto';
 import { adicionarTransacao } from '../dataBase/firebaseService';
+import CustomAlert from '../components/CustomAlert';
 
 export default function GastoScreen({ navigation }) {
   // Garante que o botão de voltar do Android só volta para a tela anterior
@@ -26,6 +27,8 @@ export default function GastoScreen({ navigation }) {
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ type: 'info', title: '', message: '' });
   const valorRef = useRef(null);
   const ajudaFecharRef = useRef(null);
   const { height } = useWindowDimensions();
@@ -55,11 +58,21 @@ export default function GastoScreen({ navigation }) {
 
   const handleSalvar = async () => {
     if (!valor || !categoria || (categoria === 'outros' && !titulo)) {
-      Alert.alert('Atenção', 'Preencha todos os campos!');
+      setAlertConfig({
+        type: 'warning',
+        title: 'Atenção',
+        message: 'Preencha todos os campos!'
+      });
+      setAlertVisible(true);
       return;
     }
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
-      Alert.alert('Atenção', 'Digite um valor válido!');
+      setAlertConfig({
+        type: 'warning',
+        title: 'Atenção',
+        message: 'Digite um valor válido!'
+      });
+      setAlertVisible(true);
       return;
     }
     try {
@@ -69,9 +82,19 @@ export default function GastoScreen({ navigation }) {
       setTitulo('');
       setValor('');
       setCategoria(null);
-      Alert.alert('Pronto', 'Gasto registrado com sucesso!');
+      setAlertConfig({
+        type: 'success',
+        title: 'Pronto!',
+        message: 'Gasto registrado com sucesso!'
+      });
+      setAlertVisible(true);
     } catch (e) {
-      Alert.alert('Erro', 'Não foi possível salvar o gasto. Tente novamente.');
+      setAlertConfig({
+        type: 'error',
+        title: 'Erro',
+        message: 'Não foi possível salvar o gasto. Tente novamente.'
+      });
+      setAlertVisible(true);
     } finally {
       setSalvando(false);
     }
@@ -214,6 +237,20 @@ export default function GastoScreen({ navigation }) {
           )}
         </TouchableOpacity>
       </View>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertVisible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertVisible(false)}
+        customColors={{
+          color: '#dc2626',      // Vermelho para o botão
+          bgColor: '#fee2e2',    // Rosa claro para o fundo do ícone
+          iconColor: '#b91c1c'   // Vermelho escuro para o ícone
+        }}
+      />
     </View>
   );
 }
