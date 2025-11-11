@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.primary,
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: 'left',
     letterSpacing: 1,
   },
   card: {

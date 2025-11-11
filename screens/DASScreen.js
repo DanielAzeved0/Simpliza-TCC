@@ -89,11 +89,11 @@ export default function DASScreen({ navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
-        <View style={{ alignItems: 'center', marginBottom: 20 }}>
+        <View style={styles.headerContainer}>
           <Text style={styles.title}>Cálculo do DAS</Text>
           <Pressable
             onPress={() => setAjudaVisible(true)}
-            style={{ position: 'absolute', right: 0, top: 0 }}
+            style={styles.helpButton}
             accessibilityRole="button"
             accessibilityLabel="Abrir ajuda sobre o DAS"
             accessibilityHint="Mostra explicação sobre o documento DAS e valores"
@@ -240,12 +240,29 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  helpButton: {
+    padding: 4,
+  },
   header: {
     // Removido para centralização do título
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
+    color: '#065f46',
+    marginTop: 20,
+    textAlign: 'left',
+    marginBottom: 10,
+    flex: 1,
+  },
+  subtitle: {
+    fontSize: 16,
     color: '#065f46',
     marginTop: 20,
     marginBottom: 10,

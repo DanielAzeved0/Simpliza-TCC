@@ -234,7 +234,7 @@ export default function HistoricoScreen({ navigation }) {
         </View>
       </Modal>
       <View style={styles.container}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={styles.headerContainer}>
           <Text style={styles.title}>Histórico</Text>
           <TouchableOpacity
             onPress={() => setAjudaVisible(true)}
@@ -242,6 +242,7 @@ export default function HistoricoScreen({ navigation }) {
             accessibilityLabel="Abrir ajuda sobre o histórico"
             accessibilityHint="Mostra explicações sobre como usar o histórico"
             testID="botao-ajuda-historico"
+            style={styles.helpButton}
           >
             <Ionicons name="help-circle-outline" size={28} color="#065f46" accessibilityLabel="Ícone de ajuda" />
           </TouchableOpacity>
@@ -313,8 +314,9 @@ export default function HistoricoScreen({ navigation }) {
           animationType="fade"
           transparent
           onRequestClose={() => setModalVisible(false)}
+          statusBarTranslucent
         >
-          <View style={styles.confirmModalOverlay}>
+          <View style={styles.editModalOverlay}>
             <View style={
               registroSelecionado?.tipo === 'gasto'
                 ? styles.gastoModalContent
@@ -433,6 +435,13 @@ export default function HistoricoScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  editModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   deleteModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -512,14 +521,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
-    width: '80%',
+    width: '90%',
+    maxWidth: 400,
     borderWidth: 2,
     borderColor: '#dc2626',
     shadowColor: '#dc2626',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 10,
-    zIndex: 1000,
     shadowOffset: { width: 0, height: 2 },
   },
   cancelButtonRed: {
@@ -545,7 +554,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
-    width: '80%',
+    width: '90%',
+    maxWidth: 400,
     borderWidth: 2,
     borderColor: '#065f46',
     shadowColor: '#065f46',
@@ -553,20 +563,28 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 10,
-    zIndex: 1000,
   },
   container: {
     flex: 1,
     backgroundColor: '#e6f4ea',
     padding: 20,
   },
-  title: {
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
     paddingTop: 60,
+  },
+  helpButton: {
+    padding: 4,
+  },
+  title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#065f46',
-    textAlign: 'center',
-    marginBottom: 20,
+    textAlign: 'left',
+    flex: 1,
   },
   filtros: {
     flexDirection: 'row',
