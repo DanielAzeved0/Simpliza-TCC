@@ -6,7 +6,6 @@ import { Checkbox, Provider as PaperProvider } from 'react-native-paper';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../dataBase/firebaseConfig';
-import useGoogleAuth from '../dataBase/googleAuth';
 import CustomAlert from '../components/CustomAlert';
 
 export default function LoginScreen({ navigation }) {
@@ -29,16 +28,6 @@ export default function LoginScreen({ navigation }) {
     const [alertConfig, setAlertConfig] = useState({ type: 'info', title: '', message: '' });
     const emailRef = React.useRef(null);
     const senhaRef = React.useRef(null);
-
-    const { promptAsync, request } = useGoogleAuth(navigation);
-        const [consentido, setConsentido] = useState(false);
-
-        useEffect(() => {
-            (async () => {
-                const v = await AsyncStorage.getItem('consentimentoLGPD');
-                setConsentido(v === 'true');
-            })();
-        }, []);
 
     const login = async () => {
         try {
@@ -145,31 +134,6 @@ export default function LoginScreen({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={styles.googleButton}
-                    onPress={async () => {
-                        if (!consentido) {
-                            setAlertConfig({
-                                type: 'warning',
-                                title: 'Consentimento',
-                                message: 'Você precisa aceitar a política de privacidade antes de usar login via Google.',
-                            });
-                            setAlertVisible(true);
-                            return;
-                        }
-                        promptAsync();
-                    }}
-                    disabled={!request}
-                    activeOpacity={0.7}
-                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                    accessibilityRole="button"
-                    accessibilityLabel="Conectar com o Google"
-                    accessibilityHint="Fazer login usando sua conta Google"
-                    testID="botao-google"
-                >
-                    <Text style={styles.googleText}>Conectar com o Google</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
                     style={styles.cadastroButton}
                     onPress={() => navigation.navigate('CriarConta')}
                     activeOpacity={0.7}
@@ -224,8 +188,6 @@ const styles = StyleSheet.create({
     button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 15 },
     buttonDisabled: { backgroundColor: '#cccccc' },
     buttonText: { color: 'white', fontSize: 18 },
-    googleButton: { backgroundColor: '#fff', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 10, borderColor: '#ccc', borderWidth: 1 },
-    googleText: { color: '#000' },
     cadastroButton: { marginTop: 10, alignItems: 'center' },
     cadastroText: { color: '#065f46', fontWeight: 'bold', fontSize: 16, textDecorationLine: 'underline' },
     label: { fontWeight: 'bold', color: '#222', fontSize: 16, marginBottom: 4, marginLeft: 2 },

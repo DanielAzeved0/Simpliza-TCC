@@ -20,7 +20,7 @@ export default function PrivacyConsentModal({ visible, onClose, navigation }) {
           <Text style={styles.title}>Política de Privacidade</Text>
           <Text style={styles.text} numberOfLines={6}>
             Para usar o Simpliza precisamos do seu consentimento para coletar e armazenar seus dados de conta e transações.
-            Você pode ler a política completa e aceitar ou recusar. Se recusar, alguns recursos (login via Google, analytics) serão desativados.
+            Você pode ler a política completa e aceitar ou recusar.
           </Text>
 
           <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('Privacy') }>

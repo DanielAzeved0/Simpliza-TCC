@@ -5,7 +5,6 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../dataBase/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
-import useGoogleAuth from '../dataBase/googleAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomAlert from '../components/CustomAlert';
 
@@ -38,16 +37,6 @@ export default function CriarContaScreen({ navigation }) {
     const emailRef = useRef(null);
     const senhaRef = useRef(null);
     const confirmaSenhaRef = useRef(null);
-
-    const { promptAsync, request } = useGoogleAuth(navigation);
-    const [consentido, setConsentido] = useState(false);
-
-    useEffect(() => {
-        (async () => {
-            const v = await AsyncStorage.getItem('consentimentoLGPD');
-            setConsentido(v === 'true');
-        })();
-    }, []);
 
     // Função para validar formato do email
     const validarFormatoEmail = (email) => {
@@ -287,28 +276,6 @@ export default function CriarContaScreen({ navigation }) {
                             {verificandoEmail ? 'Verificando email...' : 'Criar conta'}
                         </Text>
                     </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.googleButton}
-                        onPress={async () => {
-                            if (!consentido) {
-                                setAlertConfig({
-                                    type: 'warning',
-                                    title: 'Consentimento',
-                                    message: 'Você precisa aceitar a política de privacidade antes de usar login via Google.',
-                                });
-                                setAlertVisible(true);
-                                return;
-                            }
-                            promptAsync();
-                        }}
-                        disabled={!request}
-                        accessibilityRole="button"
-                        accessibilityLabel="Conectar com o Google"
-                        testID="botao-google"
-                    >
-                        <Text style={styles.googleText}>Conectar com o Google</Text>
-                    </TouchableOpacity>
                 </View>
             </ScrollView>
             <CustomAlert
@@ -334,7 +301,5 @@ const styles = StyleSheet.create({
     buttonsContainer: { alignItems: 'center', marginTop: 10, width: '100%', alignSelf: 'center' },
     button: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 10, alignSelf: 'stretch', width: '100%' },
     buttonDisabled: { backgroundColor: '#cccccc' },
-    buttonText: { color: 'white', fontSize: 18 },
-    googleButton: { backgroundColor: '#fff', padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 14, marginBottom: 10, borderColor: '#ccc', borderWidth: 1, alignSelf: 'stretch', width: '100%' },
-    googleText: { color: '#000' }
+    buttonText: { color: 'white', fontSize: 18 }
 });

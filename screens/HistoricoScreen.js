@@ -65,7 +65,9 @@ export default function HistoricoScreen({ navigation }) {
     setRegistroSelecionado(item);
     setTituloEdit(item.titulo);
     setDescricaoEdit(item.descricao || '');
-    setValorEdit(item.valor.toString());
+    // Formata o valor para exibir com 2 casas decimais
+    const valorFormatado = item.valor.toFixed(2).replace('.', ',');
+    setValorEdit(valorFormatado);
     setCategoriaEdit(item.categoria);
     setErroTituloEdit('');
     setErroValorEdit('');
@@ -85,10 +87,13 @@ export default function HistoricoScreen({ navigation }) {
       setErroTituloEdit('Título obrigatório');
       return;
     }
-    if (!valorEdit.trim() || isNaN(Number(valorEdit.replace(',', '.')))) {
+    
+    const valorNumerico = parseFloat(valorEdit.replace(',', '.'));
+    if (!valorEdit.trim() || isNaN(valorNumerico)) {
       setErroValorEdit('Valor inválido');
       return;
     }
+    
     await updateTransacao(registroSelecionado.id, {
       ...registroSelecionado,
       titulo: tituloEdit,
@@ -96,7 +101,7 @@ export default function HistoricoScreen({ navigation }) {
         registroSelecionado?.tipo === 'ganho'
           ? descricaoEdit
           : (registroSelecionado.descricao ?? ''),
-      valor: parseFloat(valorEdit.replace(',', '.')),
+      valor: valorNumerico,
       categoria: categoriaEdit
     });
     setModalVisible(false);
@@ -367,23 +372,36 @@ export default function HistoricoScreen({ navigation }) {
               <TextInput
                 ref={valorEditRef}
                 style={styles.modalInputFull}
-                value={valorEdit}
+                value={`R$ ${valorEdit}`}
                 onChangeText={text => {
-                  const sanitized = text.replace(/[^0-9,]/g, '');
-                  setValorEdit(sanitized);
-                  if (!sanitized.trim() || isNaN(Number(sanitized.replace(',', '.')))) {
-                    setErroValorEdit('Valor inválido');
-                  } else {
+                  // Remove o R$ e espaços
+                  let numero = text.replace(/[^0-9]/g, '');
+                  
+                  // Se não houver número, define como 0,00
+                  if (!numero) {
+                    setValorEdit('0,00');
                     setErroValorEdit('');
+                    return;
                   }
+                  
+                  // Converte para centavos
+                  const centavos = parseInt(numero, 10);
+                  
+                  // Formata com vírgula após 2 dígitos decimais
+                  const reais = Math.floor(centavos / 100);
+                  const cents = centavos % 100;
+                  const valorFormatado = `${reais},${String(cents).padStart(2, '0')}`;
+                  
+                  setValorEdit(valorFormatado);
+                  setErroValorEdit('');
                 }}
-                placeholder="Valor"
+                placeholder="R$ 0,00"
                 inputMode="decimal"
                 keyboardType="decimal-pad"
                 returnKeyType="done"
                 onSubmitEditing={salvarEdicao}
                 accessibilityLabel="Campo de valor"
-                accessibilityHint="Digite o valor do registro, apenas números"
+                accessibilityHint="Digite o valor do registro"
                 testID="input-valor-edit"
               />
               {!!erroValorEdit && (

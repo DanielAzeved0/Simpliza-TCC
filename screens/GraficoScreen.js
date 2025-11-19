@@ -136,7 +136,13 @@ export default function GraficoScreen({ navigation }) {
     const bData = {
       labels: ['Ganhos', 'Gastos'],
       datasets: [
-        { data: [sG, sGa] }
+        { 
+          data: [sG, sGa],
+          colors: [
+            (opacity = 1) => '#10b981', // Verde escuro para Ganhos
+            (opacity = 1) => '#dc2626'  // Vermelho escuro para Gastos
+          ]
+        }
       ]
     };
 
@@ -152,7 +158,20 @@ export default function GraficoScreen({ navigation }) {
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
     propsForLabels: {
       fontSize: 12,
+    },
+    formatYLabel: (value) => {
+      const num = parseFloat(value);
+      return Math.round(num / 150) * 150;
     }
+  };
+
+  const chartConfigWithColors = {
+    ...chartConfig,
+    fillShadowGradientFrom: '#10b981',
+    fillShadowGradientFromOpacity: 1,
+    fillShadowGradientTo: '#10b981',
+    fillShadowGradientToOpacity: 1,
+    formatTopLabelValue: (value) => formatBRL(value)
   };
 
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -318,7 +337,7 @@ export default function GraficoScreen({ navigation }) {
                 {pieData.map((item, idx) => (
                   <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12, marginBottom: 4 }}>
                     <View style={{ width: 12, height: 12, backgroundColor: item.color, marginRight: 4, borderRadius: 2, borderWidth: 1, borderColor: '#222' }} />
-                    <Text style={{ fontSize: 13 }}>{item.categoria}: {formatBRL(item.valor)}</Text>
+                    <Text style={{ fontSize: 13 }}>{item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1)}: {formatBRL(item.valor)}</Text>
                   </View>
                 ))}
               </View>
@@ -345,6 +364,8 @@ export default function GraficoScreen({ navigation }) {
               style={[styles.chart, { minWidth: width - 40 }]}
               fromZero
               segments={5}
+              withCustomBarColorFromData={true}
+              flatColor={true}
               accessible
               accessibilityLabel="Gráfico de barras comparando ganhos e gastos"
             />
