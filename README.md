@@ -72,8 +72,5 @@ Você pode verificar se a atualização funciona forçando o fechamento do aplic
 ### 6. Observações importantes. Em seguida certifique-se q a **EAS** foi baixada usando o comando:
 - Certifique-se de que todas as dependências estejam instaladas antes de rodar o app.
 
-## 📂 Estrutura do Projeto
-- `simpliza/` — App React Native (Expo)
-
 ## 👨‍💻 Contato
-Dúvidas ou sugestões? Entre em contato com o desenvolvedor.
+Dúvidas ou sugestões? Entre em contato com o desenvolvedor. 
