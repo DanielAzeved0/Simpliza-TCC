@@ -5,6 +5,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import AnimatedInput from '../components/AnimatedInputGasto';
 import { adicionarTransacao } from '../dataBase/firebaseService';
 import CustomAlert from '../components/CustomAlert';
+import { CATEGORIAS_GASTOS } from '../utils/constants';
 
 export default function GastoScreen({ navigation }) {
   // Garante que o botão de voltar do Android só volta para a tela anterior
@@ -45,12 +46,7 @@ export default function GastoScreen({ navigation }) {
     return v;
   };
 
-  const categorias = [
-    { label: 'Comida', value: 'mercado' },
-    { label: 'Luz', value: 'luz' },
-    { label: 'Transporte', value: 'transporte' },
-    { label: 'Outros', value: 'outros' },
-  ];
+  const categorias = CATEGORIAS_GASTOS;
 
   // Deriva valor numérico e estado de invalidez para feedback inline
   const valorNumerico = parseFloat((valor || '').replace(/\./g, '').replace(',', '.'));

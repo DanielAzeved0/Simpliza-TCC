@@ -9,7 +9,8 @@ import { auth, db } from '../dataBase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import NavBar from '../components/navBar';
 import CustomAlert from '../components/CustomAlert';
-const cores = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#fd79a8', '#a29bfe', '#dfe6e9'];
+import { CORES_GRAFICOS } from '../utils/constants';
+const cores = CORES_GRAFICOS;
 
 export default function GraficoScreen({ navigation }) {
   const lastBackPress = useRef(0);
@@ -331,6 +332,8 @@ export default function GraficoScreen({ navigation }) {
                   style={styles.pieChart}
                   accessible
                   accessibilityLabel="Gráfico de pizza dos maiores gastos do mês"
+                  strokeWidth={2}
+                  strokeColor="#000"
                 />
               </View>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>

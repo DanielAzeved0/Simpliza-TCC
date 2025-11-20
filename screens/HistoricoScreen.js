@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import { getHistorico, updateTransacao, deleteTransacao } from '../dataBase/firebaseService.js';
 import NavBar from '../components/navBar';
+import { CATEGORIAS_GASTOS } from '../utils/constants';
 
 export default function HistoricoScreen({ navigation }) {
   // Protege botão voltar Android para voltar para tela anterior
@@ -29,12 +30,7 @@ export default function HistoricoScreen({ navigation }) {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  const categorias = [
-    { label: 'Comida', value: 'mercado' },
-    { label: 'Luz', value: 'luz' },
-    { label: 'Transporte', value: 'transporte' },
-    { label: 'Outros', value: 'outros' },
-  ];
+  const categorias = CATEGORIAS_GASTOS;
 
   const carregarTransacoes = async () => {
     const resultado = await getHistorico();
