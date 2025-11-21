@@ -11,7 +11,12 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "node": "20.18.0"
     },
     "production": {
       "autoIncrement": true,
