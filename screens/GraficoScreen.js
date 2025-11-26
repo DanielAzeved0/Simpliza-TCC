@@ -104,8 +104,22 @@ export default function GraficoScreen({ navigation }) {
   const formatBRL = (n) => `R$ ${Number(n || 0).toFixed(2).replace('.', ',')}`;
 
   const { ganhos, gastos, somaGanhos, somaGastos, barChartData, pieData, ganhosPorMes, gastosPorMes } = useMemo(() => {
-    const g = historico.filter(i => i.tipo === 'ganho');
-    const ga = historico.filter(i => i.tipo === 'gasto');
+    // Obter mês e ano atuais
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+
+    // Filtrar transações do mês atual
+    const transacoesMesAtual = historico.filter(item => {
+      const data = item.data ? new Date(item.data) : null;
+      if (data && data.getMonth) {
+        return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+      }
+      return false;
+    });
+
+    const g = transacoesMesAtual.filter(i => i.tipo === 'ganho');
+    const ga = transacoesMesAtual.filter(i => i.tipo === 'gasto');
     const somaArr = (arr) => arr.reduce((acc, cur) => acc + parseValor(cur.valor), 0);
     const sG = somaArr(g);
     const sGa = somaArr(ga);
