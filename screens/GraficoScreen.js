@@ -374,7 +374,7 @@ export default function GraficoScreen({ navigation }) {
               height={240}
               chartConfig={{
                 ...chartConfig,
-                formatTopLabelValue: (value) => formatBRL(value)
+                formatTopBarValue: (value) => formatBRL(value)
               }}
               verticalLabelRotation={0}
               showValuesOnTopOfBars={true}
