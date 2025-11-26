@@ -1,0 +1,55 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║                 GUIA RÁPIDO - POPULAR BANCO DE DADOS              ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+🎯 OBJETIVO
+   Popular o banco de dados com 5 meses de transações de teste
+
+📱 PASSO A PASSO
+
+   1. Abra o app Simpliza
+   
+   2. Faça login com sua conta
+   
+   3. Vá para "Configurações" (ícone de engrenagem 🔧)
+   
+   4. Clique em "🛠️ Ferramentas de Dev"
+      (Aparece apenas em modo desenvolvimento)
+   
+   5. Clique em "Popular Dados"
+   
+   6. Confirme a operação
+   
+   7. Aguarde ~30-60 segundos
+   
+   8. Pronto! ✅
+
+📊 O QUE SERÁ CRIADO
+
+   ✓ 100-150 transações distribuídas por 5 meses
+   ✓ Salários mensais (R$ 2.500 - R$ 5.000)
+   ✓ Ganhos variados (freelance, bônus, cashback)
+   ✓ Gastos em todas as categorias:
+     • Comida (mercado, feira)
+     • Contas (luz, água, telefone)
+     • Transporte (uber, gasolina)
+     • Outros (farmácia, lazer, etc)
+
+🧹 PARA LIMPAR TUDO
+
+   Ferramentas de Dev → Limpar Tudo → Confirmar
+   
+   ⚠️  ATENÇÃO: Esta ação é IRREVERSÍVEL!
+
+💡 DICAS
+
+   • Use em conta de teste, não em conta real
+   • Perfeito para testar gráficos e relatórios
+   • Execute novamente para adicionar mais dados
+   • Limpe antes de popular se quiser começar do zero
+
+📖 DOCUMENTAÇÃO COMPLETA
+
+   Leia: utils/README_POPULAR_DADOS.md
+
+═══════════════════════════════════════════════════════════════════

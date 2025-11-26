@@ -46,9 +46,9 @@ export async function adicionarTransacao(transacao) {
     const user = auth.currentUser;
     if (!user) return null;
     const transacoesRef = collection(db, 'usuarios', user.uid, 'transacoes');
-    // Adiciona data/hora atual no momento do registro
-    const dataAgora = new Date().toISOString();
-    const docRef = await addDoc(transacoesRef, { ...transacao, data: dataAgora });
+    // Se a transação já tiver uma data, usa ela; caso contrário, usa a data atual
+    const dataFinal = transacao.data || new Date().toISOString();
+    const docRef = await addDoc(transacoesRef, { ...transacao, data: dataFinal });
     return docRef.id;
   } catch (error) {
     console.error('Erro ao adicionar transação:', error);
