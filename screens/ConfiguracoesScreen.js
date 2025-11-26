@@ -317,26 +317,6 @@ export default function ConfiguracoesScreen() {
             </View>
           </View>
 
-          {/* Botão de Desenvolvimento - Popular Dados */}
-          {__DEV__ && (
-            <Pressable
-              style={[styles.card, styles.devButton]}
-              onPress={() => navigation.navigate('PopularDados')}
-              accessibilityRole="button"
-              accessibilityLabel="Ferramentas de desenvolvimento"
-              android_ripple={{ color: 'rgba(6,95,70,0.1)' }}
-            >
-              <View style={styles.devButtonContent}>
-                <Ionicons name="flask" size={28} color="#FF9800" />
-                <View style={styles.devButtonText}>
-                  <Text style={styles.devButtonTitle}>🛠️ Ferramentas de Dev</Text>
-                  <Text style={styles.devButtonSubtitle}>Popular banco de dados com dados de teste</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={24} color={COLORS.accent} />
-              </View>
-            </Pressable>
-          )}
-
           {/* Seção FAQ gerada dinamicamente a partir do array FAQS */}
           <View style={styles.saqContainer}>
             <Text style={styles.saqTitle} accessibilityRole="header">Perguntas Frequentes (FAQ)</Text>
@@ -541,31 +521,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
     marginBottom: 2,
-  },
-  devButton: {
-    backgroundColor: '#FFF3E0',
-    borderWidth: 2,
-    borderColor: '#FF9800',
-    borderStyle: 'dashed',
-    marginBottom: 20,
-    padding: 16,
-  },
-  devButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  devButtonText: {
-    flex: 1,
-  },
-  devButtonTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: 4,
-  },
-  devButtonSubtitle: {
-    fontSize: 13,
-    color: COLORS.accent,
   },
 });
